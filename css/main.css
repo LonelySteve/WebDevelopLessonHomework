@@ -1,0 +1,54 @@
+#nav {
+    margin: 0;
+    padding: 0;
+    height: 49px;
+    background-color: #2196f3;
+}
+
+#nav>li {
+    float: left;
+}
+
+.dropbtn,
+.dropdown-content>li {
+    display: inline-block;
+    color: white;
+    padding: 14px 30px;
+}
+
+.dropdown:hover,
+.dropbtn {
+    background-color: #2196f3;
+}
+
+.dropbtn:hover {
+    background-color: #1e88e5;
+}
+
+.dropdown {
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    padding: 0px 0px;
+    width: 133.39px;
+    /*去除无序列表的标记*/
+    list-style-type: none;
+    position: absolute;
+    background-color: #64b5f6;
+}
+
+/*实现下拉菜单弹出*/
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content>li {
+    text-align: center;
+    display: block;    
+}
+
+.dropdown-content>li:hover {
+    background-color: #90caf9;
+}
