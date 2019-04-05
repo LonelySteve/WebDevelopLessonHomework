@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <title>用户注册</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <div class="panel" style="padding-bottom:5px;">
+        <h2>DOM操作</h2>
+        <div style="margin: 0 auto;width: 130px">
+            <div style="text-align: left;margin: 5px 0;">
+                <input type="radio" name="operation" id="dom-action-jquery" value="JQuery" class="rd" checked="checked">
+                <label for="dom-action-jquery"> </label>
+                <label for="dom-action-jquery" style="cursor: pointer;">使用JQuery</label>
+            </div>
+            <div style="text-align: left;margin: 5px 0;">
+                <input type="radio" name="operation" id="dom-action-js" value="JavaScript" class="rd">
+                <label for="dom-action-js"></label>
+                <label for="dom-action-js" style="cursor: pointer;">使用JavaScript</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>用户注册</h2>
+        <div style="margin: 0 auto;width: 250px">
+            <div>
+                <label for="username-edit" style="display:block;text-align: left;">用户名</label>
+                <input type="text" name="username" class="edit" id="username-edit" placeholder="请输入用户名">
+                <label id="username-edit-hint" for="username-edit" class="tip"></label>
+                <label for="password-edit" style="display:block;text-align: left;">密码</label>
+                <input type="password" name="password" class="edit" id="password-edit" placeholder="请输入密码">
+                <label id="password-edit-hint" for="username-edit" class="tip"></label>
+            </div>
+        </div>
+        <input type="submit" value="注册" id="submit-btn" class="btn">
+    </div>
+
+    <div class="panel">
+        <h3>已注册的用户列表</h3>
+        <table id="registered-users-table" class="stagger-table" style="width:100%;">
+            <thead>
+                <th>用户名</th>
+                <th>密码</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>root</td>
+                    <td>pwd123456</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="panel" style="width:600px; text-align: left; padding: 2px 10px; margin-top: 20px;">
+        <h3>注册规则（加强版）</h3>
+        <ul>
+            <li>用户名与密码均不能为空</li>
+            <li>用户名长度必须小于等于10</li>
+            <li>用户名不能为"root"（以及其它已注册账户名）</li>
+            <li>密码长度必须大于等于7，小于等于16</li>
+            <li>密码不能是纯数字或纯字母，允许使用下列特殊字符串中的字符作为密码字符：
+                <ul>
+                    <li>!@#$%^&*?()</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <script src="js/operation.js"></script>
+    <script>
+        // 设置全局变量，标识当前选择的操作DOM的方法名
+        var current_operation_method = $('input[name="operation"]:checked').val();
+
+        function get_operation_obj(name) {
+            var o;
+            switch (name.toLocaleLowerCase()) {
+                case "jquery":
+                    o = new JQueryOperation();
+                    break;
+                case "javascript":
+                    o = new JavaScriptOperation();
+                    break;
+            }
+            return o;
+        }
+
+        function toggle_operation(name) {
+            // 首先移除所有事件处理程序
+            get_operation_obj(current_operation_method).unbind();
+            // 重新绑定事件处理程序
+            get_operation_obj(name).ready();
+            current_operation_method = name;
+        }
+
+        document.getElementsByName("operation").forEach(
+            node => {
+                node.onchange = function () {
+                    toggle_operation(node.value);
+                };
+            }
+        );
+        // 使用当前操作DOM的方法来初始化
+        toggle_operation(current_operation_method);
+
+    </script>
+
+</body>
+
+</html>
