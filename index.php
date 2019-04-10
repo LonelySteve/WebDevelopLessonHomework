@@ -1,5 +1,5 @@
 <?php
-$head =<<<___
+$head = <<<___
 <!DOCTYPE html>
 <html lang="zh">
 
@@ -107,7 +107,7 @@ $head =<<<___
     </div>
 ___;
 
-$script =<<<___
+$script = <<<___
  <script>
         function get_sort_rule_flag(id) {
             var th = $("#" + id);
@@ -181,6 +181,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     }
 
     echo $head;
+
     foreach ($classes as $i => $class) {
         echo '<div class="panel">' . "\n";
         echo "<h2>" . ($i + 1) . "班的名单" . "</h3>" . "\n";
@@ -246,8 +247,4 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     } else {
         echo json_encode(array("code" => -1));
     }
-
 }
-
-?>
-
