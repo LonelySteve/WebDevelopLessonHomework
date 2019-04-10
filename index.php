@@ -170,24 +170,16 @@ $script =<<<___
 ___;
 
 
-if ($_SERVER["REQUEST_METHOD"] == "GET"){
-    $classes = [
-        [
-            ["2017001", "江路1", 18],
-            ["2017002", "江路2", 19],
-            ["2017003", "江路3", 20],
-        ],
-        [
-            ["2017004", "江路4", 18],
-            ["2017005", "江路5", 19],
-            ["2017006", "江路6", 20],
-        ],
-        [
-            ["2017007", "江路7", 18],
-            ["2017008", "江路8", 19],
-            ["2017009", "江路9", 20],
-        ]
-    ];
+if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    $classes = array();
+
+    for ($i = 0; $i < 3; $i++) {
+        $classes[] = array();
+        for ($j = 0; $j < 3; $j++) {
+            $classes[$i][] = array("201700" . ($i * 3 + $j), "江路" . $j, 17 + $j);
+        }
+    }
+
     echo $head;
     foreach ($classes as $i => $class) {
         echo '<div class="panel">' . "\n";
@@ -214,22 +206,20 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
     echo "</body>";
 
     echo "</html>";
-}
-elseif ($_SERVER["REQUEST_METHOD"] == "POST")
-{
-    $students = [
-        ["201701", "江路1", "100"],
-        ["201702", "江路2", "80"],
-        ["201703", "江路3", "130"],
-        ["201704", "江路1", "120"],
-        ["201705", "江路1", "80"],
-        ["201706", "江路4", "50"],
-        ["201707", "江路1", "120"],
-        ["201708", "江路6", "80"],
-        ["201709", "江路1", "100"],
-        ["201710", "江路1", "80"],
-        ["201711", "江路9", "110"]
-    ];
+} elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $students = array(
+        array("201701", "江路1", "100"),
+        array("201702", "江路2", "80"),
+        array("201703", "江路3", "130"),
+        array("201704", "江路1", "120"),
+        array("201705", "江路1", "80"),
+        array("201706", "江路4", "50"),
+        array("201707", "江路1", "120"),
+        array("201708", "江路6", "80"),
+        array("201709", "江路1", "100"),
+        array("201710", "江路1", "80"),
+        array("201711", "江路9", "110")
+    );
 
     function compare_func($a, $b)
     {
@@ -252,9 +242,9 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST")
 
     header('Content-Type:application/json');
     if (usort($students, "compare_func")) {
-        echo json_encode(["code" => 0, "data" => $students]);
+        echo json_encode(array("code" => 0, "data" => $students));
     } else {
-        echo json_encode(["code" => -1]);
+        echo json_encode(array("code" => -1));
     }
 
 }
