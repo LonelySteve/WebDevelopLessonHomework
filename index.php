@@ -91,20 +91,7 @@ $head = <<<___
 </head>
 
 <body>
-<div class="panel">
-        <h2>班级成绩表</h2>
-        <table id="class-grade-table" class="stagger-table" style="width:100%;">
-            <thead>
-                <th id="h-stu-num" class="sort-flag">学号</th>
-                <th id="h-stu-name" class="sort-flag">姓名</th>
-                <th id="h-stu-grade" class="sort-flag">成绩</th>
-            </thead>
-            <tbody>
 
-            </tbody>
-        </table>
-
-    </div>
 ___;
 
 $script = <<<___
@@ -169,6 +156,23 @@ $script = <<<___
     </script>
 ___;
 
+$sortable_table = <<<___
+<div class="panel">
+        <h2>班级成绩表</h2>
+        <table id="class-grade-table" class="stagger-table" style="width:100%;">
+            <thead>
+                <th id="h-stu-num" class="sort-flag">学号</th>
+                <th id="h-stu-name" class="sort-flag">姓名</th>
+                <th id="h-stu-grade" class="sort-flag">成绩</th>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+
+    </div>
+___;
+
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     $classes = array();
@@ -203,6 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         echo "</table>" . "\n";
         echo "</div>" . "\n";
     }
+    echo $sortable_table;
     echo $script;
     echo "</body>";
 
