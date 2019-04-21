@@ -23,7 +23,7 @@
             </div>
             <div class="file-path">
                 <div class="navigate di mr5">
-                    <span id="sub-operate">
+                    <span id="sub-operate" class="dn">
                         <span id="btn-download" class="icon-btn download"></span>
                         <!-- <span id="btn-rename" class="icon-btn edit"></span> -->
                         <span id="btn-delete" class="icon-btn delete-fill bc6 bch7 bca8"></span>
@@ -224,11 +224,15 @@
                         // 取消全选
                         $('.checkbox--checked').removeClass("checkbox--checked").addClass("checkbox--unchecked");
                         unselect_all_items();
+                        // 没有选中的项，将子操作隐藏
+                        $("#sub-operate").hide();
                     } else if ($span.hasClass("checkbox--unchecked")) {
                         $span.removeClass("checkbox--unchecked").addClass("checkbox--checked");
                         // 全选
                         $('.checkbox--unchecked').removeClass("checkbox--unchecked").addClass("checkbox--checked");
                         select_all_items();
+                        // 有选中的项，取消子操作的隐藏
+                        $("#sub-operate").show();
                     }
                 }
             )
@@ -249,6 +253,8 @@
                     var $check_all_span = $("#check-all-th").find("span");
                     if (current_selected_ids.length == 0) {
                         $check_all_span.removeClass("checkbox--checked").addClass("checkbox--unchecked");
+                        // 没有选中的项，将子操作隐藏
+                        $("#sub-operate").hide();
                     }
                     // 只要取消某个选中，那么全选框就应该取消选中
                     if ($check_all_span.hasClass("checkbox--checked")) {
@@ -263,6 +269,8 @@
                         $("#check-all-th").find("span").removeClass("checkbox--unchecked").addClass(
                             "checkbox--checked");
                     }
+                    // 有选中的项，取消子操作的隐藏
+                    $("#sub-operate").show();
                 }
             },
         }, "tr");
@@ -272,7 +280,7 @@
                 var $sub_op = $("#sub-operate");
                 if (e.which === 3) {
                     $sub_op.addClass("pa");
-                    $sub_op.show().css({
+                    $sub_op.css({
                         top: e.pageY - 10,
                         left: e.pageX - 10
                     });
