@@ -41,7 +41,7 @@ class FileInfo
     function __construct($file_abspath)
     {
         $this->file_abspath = $file_abspath;
-        $this->type = filetype($file_abspath);
+        $this->type = pathinfo($file_abspath,PATHINFO_EXTENSION);
         $this->name = basename($file_abspath);
         $this->size = filesize($file_abspath);
         $this->upload_time = filectime($file_abspath);
@@ -64,10 +64,12 @@ class DirInfo
 class WalkableDir
 {
     protected $current_workdir;
+    protected $upload_dir_path;
 
-    function __construct($current_workdir)
+    function __construct($upload_dir_path, $current_workdir)
     {
         $this->current_workdir = $current_workdir;
+        $this->upload_dir_path = $upload_dir_path;
     }
 
     protected function _get_realpath($relative_path)
@@ -77,12 +79,13 @@ class WalkableDir
 
     protected function _query($filter_rules = null)
     {
-        $files_arr = array_diff(scandir($this->current_workdir), array(".", ".."));
+        $cwd = $this->_get_realpath($this->current_workdir);
+        $files_arr = array_diff(scandir($cwd), array(".", ".."));
         if (is_array($filter_rules)) {
             foreach ($filter_rules as $rule) {
                 $files_arr = preg_grep($rule, $files_arr);
             }
-        } else {
+        } else if ($filter_rules) {
             $files_arr = preg_grep($filter_rules, $files_arr);
         }
         $result_arr = array(
@@ -112,9 +115,9 @@ class ActionResult extends WalkableDir
     public $failureCount;
     public $failureData;
 
-    function __construct($code, $msg, $current_workdir, $successCount, $failureCount, $failureData)
+    function __construct($code, $msg, $upload_dir_path, $current_workdir, $successCount, $failureCount, $failureData)
     {
-        WalkableDir::__construct($current_workdir);
+        WalkableDir::__construct($upload_dir_path, $current_workdir);
         $this->code = $code;
         $this->msg = $msg;
         $this->data = null;
@@ -132,7 +135,7 @@ class ActionResult extends WalkableDir
     function clear_action_error($when_not_failure_data = true)
     {
         if ($when_not_failure_data) {
-            if (!$failureData) {
+            if (!$this->$failureData) {
                 $this->code = 0;
                 $this->msg = "ok!";
             }
@@ -146,9 +149,9 @@ class ActionResult extends WalkableDir
         $this->failureData[] = array("code" => $code, "msg" => $msg);
     }
 
-    function flush_data()
+    function flush_data($params)
     {
-        $this->data = $this->_query();
+        $this->data = $this->_query($params);
     }
 }
 
@@ -164,6 +167,7 @@ class Manager extends WalkableDir
 
     function __construct($upload_dir_path, $current_workdir)
     {
+        WalkableDir::__construct($upload_dir_path, $current_workdir);
         $cwd = $this->_get_realpath($current_workdir);
         if (!is_dir($cwd)) {
             throw new Exception("The specified working directory does not exist!", -1);
@@ -176,12 +180,11 @@ class Manager extends WalkableDir
 
     protected function _upload($result, $params)
     {
-        $files_arr = $params[0];
-        $name = $params[1];
+        $name = $params[0];
+        $files_arr = rearrange($_FILES[$name]);
 
         $result->apply_action_error(-100, "Upload error!");
 
-        $files_arr = rearrange($files_arr[$name]);
         foreach ($files_arr as $file) {
             // 判断当前文件是否有上传错误
             switch ($file['error']) {
@@ -275,35 +278,42 @@ class Manager extends WalkableDir
 
     protected function wrapper($callback, $params)
     {
-        $result = new ActionResult(0, "ok!", $this->current_workdir, 0, 0, array());
-        $callback($result, $params);
-        $result->flush_data();
+        $result = new ActionResult(0, "ok!", $this->upload_dir_path, $this->current_workdir, 0, 0, array());
+
+        // 针对query动作传递过滤参数
+        if ($callback == "_query")
+            $result->flush_data($params);
+        else {
+            $this->$callback($result, $params);
+            $result->flush_data(null);
+
+        }
         return $result;
     }
 
     function upload($params)
     {
-        return $this->wrapper($this->_upload, $params);
+        return $this->wrapper("_upload", $params);
     }
 
     function new_dir($params)
     {
-        return $this->wrapper($this->_new_dir, $params);
+        return $this->wrapper("_new_dir", $params);
     }
 
     function rm($params)
     {
-        return $this->wrapper($this->_rm, $params);
+        return $this->wrapper("_rm", $params);
     }
 
     function query($params)
     {
-        return $this->wrapper($this->_query, $params);
+        return $this->wrapper("_query", $params);
     }
 
     function download($params)
     {
-        $result = $this->wrapper($this->_download, $params);
+        $result = $this->wrapper("_download", $params);
         if ($result->code) {
             return $result;
         }
@@ -339,12 +349,19 @@ switch ($_POST["action"]) {
     case 'mkdir':
     case 'query':
         try {
-            $result = $m->$_POST["action"]($_POST["params"]);
+            $action = $_POST["action"];
+
+            if (array_key_exists("params", $_POST)) {
+                $params = $_POST["params"];
+            } else {
+                $params = null;
+            }
+            $result = $m->$action($params);
             if ($result) {
                 exit(json_encode($result));
             }
         } catch (\Throwable $th) {
-            exit(std_jsonify($th->getCode(), $th->getMessage()));
+            exit(std_jsonify(-1, $th->getMessage()));
         }
         break;
     default:
