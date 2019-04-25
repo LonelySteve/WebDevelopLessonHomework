@@ -235,7 +235,7 @@ class Manager extends WalkableDir
             $target_path = $this->_get_realpath($name);
             try {
                 is_dir($target_path) ? delTree($target_path) : unlink($target_path);
-            } catch (\Throwable $th) {
+            } catch (Exception $th) {
                 $result->append_failure_item(-1, "Remove " . $name . " failed!");
             }
         }
@@ -326,11 +326,11 @@ class Manager extends WalkableDir
 
 
 # 上传文件夹路径
-const upload_dir_path = "upload";
+define("upload_dir_path", "upload");
 
 try {
     $m = new Manager(upload_dir_path, $_POST["cwd"]);
-} catch (\Throwable $th) {
+} catch (Exception $th) {
     exit(std_jsonify($th->getCode(), $th->getMessage()));
 }
 
@@ -361,7 +361,7 @@ switch ($_POST["action"]) {
             if ($result) {
                 exit(json_encode($result));
             }
-        } catch (\Throwable $th) {
+        } catch (Exception $th) {
             exit(std_jsonify(-1, $th->getMessage()));
         }
         break;
