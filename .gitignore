@@ -1,2 +1,4 @@
 .vscode/
 .idea/
+# 忽略上传文件储存文件夹
+upload/
