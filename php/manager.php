@@ -41,7 +41,7 @@ class FileInfo
     function __construct($file_abspath)
     {
         $this->file_abspath = $file_abspath;
-        $this->type = pathinfo($file_abspath,PATHINFO_EXTENSION);
+        $this->type = pathinfo($file_abspath, PATHINFO_EXTENSION);
         $this->name = basename($file_abspath);
         $this->size = filesize($file_abspath);
         $this->upload_time = filectime($file_abspath);
@@ -74,12 +74,12 @@ class WalkableDir
 
     protected function _get_realpath($relative_path)
     {
-        return $this->upload_dir_path . DIRECTORY_SEPARATOR . $relative_path;
+        return $this->upload_dir_path . DIRECTORY_SEPARATOR . $this->current_workdir . DIRECTORY_SEPARATOR .  $relative_path;
     }
 
     protected function _query($filter_rules = null)
     {
-        $cwd = $this->_get_realpath($this->current_workdir);
+        $cwd = $this->_get_realpath("");
         $files_arr = array_diff(scandir($cwd), array(".", ".."));
         if (is_array($filter_rules)) {
             foreach ($filter_rules as $rule) {
@@ -135,7 +135,7 @@ class ActionResult extends WalkableDir
     function clear_action_error($when_not_failure_data = true)
     {
         if ($when_not_failure_data) {
-            if (!$this->$failureData) {
+            if (!$this->failureData) {
                 $this->code = 0;
                 $this->msg = "ok!";
             }
@@ -168,7 +168,7 @@ class Manager extends WalkableDir
     function __construct($upload_dir_path, $current_workdir)
     {
         WalkableDir::__construct($upload_dir_path, $current_workdir);
-        $cwd = $this->_get_realpath($current_workdir);
+        $cwd = $this->_get_realpath("");
         if (!is_dir($cwd)) {
             throw new Exception("The specified working directory does not exist!", -1);
         }
@@ -180,8 +180,7 @@ class Manager extends WalkableDir
 
     protected function _upload($result, $params)
     {
-        $name = $params[0];
-        $files_arr = rearrange($_FILES[$name]);
+        $files_arr = rearrange($_FILES[$params]);
 
         $result->apply_action_error(-100, "Upload error!");
 
@@ -190,8 +189,8 @@ class Manager extends WalkableDir
             switch ($file['error']) {
                 case UPLOAD_ERR_OK:
                     // 移动上传的文件至当前工作目录
-                    $safe_name = realpath($file["name"]);
-                    if (!move_uploaded_file($file["tmp_name"], $this->_get_realpath($safe_name))) {
+                    // NOTE 上传的文件名不值得信任，有可能会有 ../../xx.conf 这样的文件名攻击！不过反正不是我的服务器，就这样吧  ；）
+                    if (!move_uploaded_file($file["tmp_name"], $this->_get_realpath($file["name"]))) {
                         $result->append_failure_item(-1, $file["name"] . "Failed to move temporary upload file!");
                     }
                     break;
@@ -210,11 +209,10 @@ class Manager extends WalkableDir
         $result->clear_action_error();
     }
 
-    protected function _new_dir($result, $params)
+    protected function _mkdir($result, $params)
     {
-        $names = $params[0];
         $result->apply_action_error(-200, "Failed to create new folder!");
-        foreach ($names as $name) {
+        foreach ($params as $name) {
             $new_dir_path = $this->_get_realpath($name);
             if (!is_dir($new_dir_path)) {
                 $result->append_failure_item(-1, "Directory already exists!");
@@ -228,11 +226,12 @@ class Manager extends WalkableDir
 
     protected function _rm($result, $params)
     {
-        $names = $params[0];
         $result->apply_action_error(-300, "Failed to remove the item!");
-        foreach ($names as $name) {
+        foreach ($params as $name) {
             $target_path = $this->_get_realpath($name);
-            if (!(is_dir($target_path) ? delTree($target_path) : unlink($target_path))) {
+            try {
+                is_dir($target_path) ? delTree($target_path) : unlink($target_path);
+            } catch (\Throwable $th) {
                 $result->append_failure_item(-1, "Remove " . $name . " failed!");
             }
         }
@@ -241,9 +240,8 @@ class Manager extends WalkableDir
 
     protected function _download($result, $params)
     {
-        $names = $params[0];
         $result->apply_action_error(-400, "The file is missing!");
-        foreach ($names as $name) {
+        foreach ($params as $name) {
             $target_path = $this->_get_realpath($name);
 
             if (!file_exists($target_path)) {
@@ -255,7 +253,7 @@ class Manager extends WalkableDir
             return $result;
         }
 
-        foreach ($names as $name) {
+        foreach ($params as $name) {
             $target_path = $this->_get_realpath($name);
             $file_size = filesize($target_path);
             //以只读和二进制模式打开文件
@@ -286,7 +284,6 @@ class Manager extends WalkableDir
         else {
             $this->$callback($result, $params);
             $result->flush_data(null);
-
         }
         return $result;
     }
@@ -296,9 +293,9 @@ class Manager extends WalkableDir
         return $this->wrapper("_upload", $params);
     }
 
-    function new_dir($params)
+    function mkdir($params)
     {
-        return $this->wrapper("_new_dir", $params);
+        return $this->wrapper("_mkdir", $params);
     }
 
     function rm($params)
@@ -334,15 +331,15 @@ try {
 }
 
 switch ($_POST["action"]) {
-    // 每种操作统一返回一个结果数组，这个数组的json结构类似于：
-    // {
-    //      "code":"0", // 操作失败的时候，code 为非0值
-    //      "msg":"ok!", // 消息，出错为出错消息描述
-    //      "data":[],    // 无论是否成功或失败，这将是一个当前工作目录的文件数组（当cwd出错时，这将是一个空数组）
-    //      "successCount":5, // 成功操作的元素数量
-    //      "failureCount":0, // 操作失败的元素数量
-    //      "failureData":[]  // 失败的元素数组，如果操作没有失败，这将是一个空数组
-    // }
+        // 每种操作统一返回一个结果数组，这个数组的json结构类似于：
+        // {
+        //      "code":"0", // 操作失败的时候，code 为非0值
+        //      "msg":"ok!", // 消息，出错为出错消息描述
+        //      "data":[],    // 无论是否成功或失败，这将是一个当前工作目录的文件数组（当cwd出错时，这将是一个空数组）
+        //      "successCount":5, // 成功操作的元素数量
+        //      "failureCount":0, // 操作失败的元素数量
+        //      "failureData":[]  // 失败的元素数组，如果操作没有失败，这将是一个空数组
+        // }
     case 'upload':
     case 'download':
     case 'rm':

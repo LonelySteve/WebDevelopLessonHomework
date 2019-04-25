@@ -146,8 +146,7 @@
     margin: 5px;
 }
 
-.child-item,
-.root-item {
+.path-item {
     display: inline;
     font-size: 25px;
 }

@@ -17,7 +17,7 @@
         <div class="nav">
             <div class="operate">
                 <label for="file-upload-input" class="icon-btn upload">上传</label>
-                <input type="file" id="file-upload-input" />
+                <input type="file" id="file-upload-input" multiple="multiple" />
                 <!-- <input type="text" name="search-keywords" id="text-search-keywords" class="edit-box"
                     placeholder="请输入搜索关键字" /> -->
             </div>
@@ -29,12 +29,19 @@
                         <span id="btn-delete" class="icon-btn delete-fill bc6 bch7 bca8"></span>
                     </span>
                     <span id="btn-add-folder" class="icon-btn folder-add"></span>
-                    <span id="btn-prev" class="icon-btn arrowleft"></span>
-                    <span id="btn-next" class="icon-btn arrowright"></span>
+
                     <span id="btn-reload" class="icon-btn reload"></span>
                 </div>
-                <div class="path mt10">
-                    <div class="root-item"><span class="icon-btn disable-before">/</span></div>
+                <div class="mt10">
+                    <div class="di">
+                        <span id="btn-prev" class="icon-btn arrowleft"></span>
+                        <!--NOTE 没有用的前进键 -->
+                        <!-- <span id="btn-next" class="icon-btn arrowright"></span> -->
+                    </div>
+
+                    <div class="path di" id="path-container">
+                        <div class="root-item path-item"><span class="icon-btn disable-before">/</span></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,145 +62,188 @@
     </div>
 
     <script>
-        var current_workdir = "";
-        var current_selected_ids = [];
-        var current_unselected_ids = [];
+        var current_workdir_path_items = [];
+        var current_selected_names = [];
+        var current_unselected_names = [];
 
-        function async_action(action, params, callback) {
+        var file_icon_mapping = {
+            "file-image-fill": ["jpg", "png", "gif"],
+            "file-markdown-fill": ["md"],
+            "file-pdf-fill": ["pdf"],
+            "file-ppt-fill": ["ppt", "pptx"],
+            "file-text-fill": ["txt"],
+            "file-word-fill": ["doc", "docx"],
+            "file-zip-fill": ["zip", "7z", "rar"],
+            "file-excel-fill": ["xls", "xlsx"],
+        };
+
+        function get_cwd() {
+            return current_workdir_path_items.join("/");
+        }
+
+        function get_file_icon(ext) {
+            for (const file_icon_name in file_icon_mapping) {
+                if (file_icon_mapping.hasOwnProperty(file_icon_name)) {
+                    const exts = file_icon_mapping[file_icon_name];
+                    if (exts.indexOf(ext) != -1)
+                        return file_icon_name;
+                }
+            }
+            return "file-unknown-fill";
+        }
+
+        function async_action(action, params, callback, cwd) {
             $.post("php/manager.php", {
                 action: action,
-                cwd: current_workdir,
+                cwd: cwd || get_cwd(),
                 params: params
             }, function (data, status) {
                 if (status !== "success") {
                     alert("执行动作" + action + "出错！");
+                    return;
                 }
                 if (data.code !== 0) {
                     alert("执行动作" + action + "出错！" + "出错原因：" + "[" + data.code + "]" + data.msg);
                 }
-                callback && callback(data.data);
+                if (data.hasOwnProperty("data")) {
+                    update_table(data.data);
+                }
+                if (data.code === 0 && callback) {
+                    callback(data);
+                }
             }, "json")
         }
 
-        function update_current_workdir(current_workdir) {
-            var files = current_workdir.split("/");
-            files = files.filter(function (item) {
-                return item; // 这里暂时不对名称的有效性做判断，研究发现，Linux下可以存在全空白的文件名，因此去除首尾空白的操作没有意义
-            })
-            window.current_workdir = files.join('/');
-            var path = $(".path");
+        function update_current_workdir() {
+            var $path = $(".path");
             $(".child-item").remove();
-            files.forEach(filename => {
-                if (filename) {
-                    path.append($("<div></div>")
-                        .addClass("child-item")
-                        .append($("<span></span>").text(filename)
-                            .addClass("filename child-item icon-btn disable-before")))
+            current_workdir_path_items.forEach(path_item => {
+                if (path_item) {
+                    $path.append($("<div></div>")
+                        .addClass("child-item path-item")
+                        .append($("<span></span>").text(path_item)
+                            .addClass("icon-btn disable-before")))
                 }
             });
         }
 
-        function update_table(objs) {
-            // objs 定义
-            // objs == {
-            //     "文件id":["文件名","类型","文件尺寸","上传时间"],
-            //     ...
-            // };
+        function update_table(data) {
             var $tbody = $("#files-list tbody");
-            // 重新渲染表格主体
+            // 删除旧的表格主体内容
             $tbody.empty();
-            // 重建未选择的id数组
-            current_unselected_ids = []
-            for (const id in objs) {
-                if (objs.hasOwnProperty(id)) {
-                    const line_data = objs[id];
-                    var $tr = $('<tr class="w100pct db"></tr>').attr("id", id);
-                    $tbody.append($tr);
-                    var $td = $("<td></td>");
-                    $tr.append($td);
-                    // 添加单选框
-                    $td.append($("<span></span>").addClass("icon w18b h18b checkbox--unchecked"));
-                    // 添加数据
-                    line_data.forEach(td_data => {
-                        $tr.append($('<td class="oh toe"></td>').text(td_data)
-                            .append($("<span></span>")));
-                    })
-                    current_unselected_ids.push(id);
+            // 重建未选择的名称数组
+            current_unselected_names = [];
+            // 渲染文件夹
+            data.dirs.forEach(line_data => {
+                var $tr = $('<tr class="w100pct db"></tr>');
+                $tbody.append($tr);
+                // 添加单选框
+                $tr.append($("<td></td>").append($("<span></span>").addClass(
+                    "icon w18b h18b checkbox--unchecked")));
+                // 添加图标和名称 
+                $tr.append($('<td class="oh toe tl"></td>').append($('<span class="name"></span>').addClass(
+                    "icon w18b h18b").addClass("folder-fill").text(line_data.name)));
+                // TODO 支持文件夹的大小和上传时间判断
+                for (let index = 0; index < 3; index++) {
+                    $tr.append($('<td class="oh toe"></td>').text("-"));
                 }
-            }
-        }
-
-        function query_objs(keyword) {
-            async_action("find", [keyword], function (data) {
-                update_table(data.objs);
+                current_unselected_names.push(line_data.name);
             });
+            data.files.forEach(line_data => {
+                var $tr = $('<tr class="w100pct db"></tr>');
+                $tbody.append($tr);
+                // 添加单选框
+                $tr.append($("<td></td>").append($("<span></span>").addClass(
+                    "icon w18b h18b checkbox--unchecked")));
+                // 添加图标和名称
+                $tr.append($('<td class="oh toe tl"></td>').append($('<span class="name"></span>').addClass(
+                    "icon w18b h18b").addClass(get_file_icon(line_data.type)).text(line_data.name)));
+                // 添加剩余数据
+                // TODO 人类可读的数据尺寸及上传时间
+                $tr.append($('<td class="oh toe"></td>').text(line_data.type));
+                $tr.append($('<td class="oh toe"></td>').text(line_data.size));
+                $tr.append($('<td class="oh toe"></td>').text(line_data.upload_time));
+                // 添加名称
+                current_unselected_names.push(line_data.name);
+            });
+        }
+        // TODO 支持关键字过滤
+        function query_objs(keyword) {
+            async_action("query", [keyword]);
         }
 
         function init_page() {
-            async_action("ls", ["/"], function (data) {
-                update_table(data.objs);
-            });
+            async_action("query");
         }
 
         function change_dir(dir) {
-            async_action("cd", [dir], function (data) {
-                update_current_workdir(data.cwd);
-                update_table(data.objs);
+            async_action("query", null, function (data) {
+                current_workdir_path_items.push(dir);
+                update_current_workdir();
+            }, get_cwd() + '\\' + dir);
+        }
+
+        function remove_selected_items() {
+            async_action("rm", current_selected_names, function (data) {
+                current_selected_names = [];
             });
         }
 
-        function remove_obj(objs) {
-            if (!(objs instanceof Array)) {
-                objs = [objs];
-            }
-            async_action("rm", [obj], function (data) {
-                update_current_workdir(data.cwd);
-                update_table(data.objs);
-            });
-        }
-
-        function select_items(ids) {
-            ids.forEach((id) => {
-                var i = current_unselected_ids.indexOf(id);
+        function select_items(names) {
+            names.forEach((name) => {
+                var i = current_unselected_names.indexOf(name);
                 if (i < 0)
-                    throw new Error("不存在指定文件id:" + id);
-                current_unselected_ids.splice(i, 1);
-                current_selected_ids.push(id);
+                    throw new Error("不存在指定文件:" + name);
+                current_unselected_names.splice(i, 1); // 删除指定名称项
+                current_selected_names.push(name);
             });
         }
 
-        function unselect_items(ids) {
-            ids.forEach((id) => {
-                var i = current_selected_ids.indexOf(id);
+        function unselect_items(names) {
+            names.forEach((name) => {
+                var i = current_selected_names.indexOf(name);
                 if (i < 0)
-                    throw new Error("不存在指定文件id:" + id);
-                current_selected_ids.splice(i, 1);
-                current_unselected_ids.push(id);
+                    throw new Error("不存在指定文件:" + name);
+                current_selected_names.splice(i, 1); // 删除指定名称项
+                current_unselected_names.push(name);
             })
         }
 
         function select_all_items() {
-            current_unselected_ids.forEach((id) => {
-                current_selected_ids.push(id);
-            })
-            current_unselected_ids = [];
+            current_unselected_names.forEach((name) => {
+                current_selected_names.push(name);
+            });
+            current_unselected_names = [];
         }
 
         function unselect_all_items() {
-            current_selected_ids.forEach((id) => {
-                current_unselected_ids.push(id);
-            })
-            current_selected_ids = [];
+            current_selected_names.forEach((name) => {
+                current_unselected_names.push(name);
+            });
+            current_selected_names = [];
         }
 
-        $(document).ready(
-            init_page, // 初始化页面
-            $(".operate form input").change(
+
+        function get_filename($tr) {
+            return $tr.find(".name").text();
+        }
+
+        $document = $(document);
+
+        $document.ready(init_page);
+        $document.ready(function () {
+            $("#file-upload-input").change(
+                // FIXME 上传大文件有问题
                 function () {
-                    var formData = new FormData($('.operate form')[0]);
-                    formData.append("upload_dir", "testtesttest");
+                    var formData = new FormData(this);
+                    formData.append("action", "upload");
+                    formData.append("cwd", get_cwd());
+                    formData.append("params", ["file"]);
+                    Array.from(this.files).forEach(f => {
+                        formData.append("file[]", f);
+                    });
                     $.ajax({
-                        url: "php/upload-files.php",
+                        url: "php/manager.php",
                         type: 'POST',
                         cache: false,
                         data: formData,
@@ -203,113 +253,176 @@
                         beforeSend: function () {
                             uploading = true;
                         },
-                        success: function (data) {
-                            if (data.code == 1) {
-                                alert("ok");
-                                // TODO 渲染表格
-                                update_table(data.data)
-                            } else {
-                                alert(data.msg);
+                        success: function (data, status) {
+                            if (status !== "success") {
+                                alert("执行动作" + action + "出错！");
+                                return;
                             }
-                            uploading = false;
+                            if (data.code !== 0) {
+                                alert("执行动作" + action + "出错！" + "出错原因：" + "[" + data.code +
+                                    "]" + data
+                                    .msg);
+                            }
+                            if (data.hasOwnProperty("data")) {
+                                update_table(data.data);
+                            }
                         }
                     });
                 }
-            ),
-            $("#check-all-th").click(
-                function () {
-                    var $span = $(this).find("span");
-                    if ($span.hasClass("checkbox--checked")) {
-                        $span.removeClass("checkbox--checked").addClass("checkbox--unchecked");
-                        // 取消全选
-                        $('.checkbox--checked').removeClass("checkbox--checked").addClass("checkbox--unchecked");
-                        unselect_all_items();
-                        // 没有选中的项，将子操作隐藏
-                        $("#sub-operate").hide();
-                    } else if ($span.hasClass("checkbox--unchecked")) {
-                        $span.removeClass("checkbox--unchecked").addClass("checkbox--checked");
-                        // 全选
-                        $('.checkbox--unchecked').removeClass("checkbox--unchecked").addClass("checkbox--checked");
-                        select_all_items();
+            );
+
+            var $tbody = $("#files-list tbody");
+            document.oncontextmenu = new Function("return false;"); //禁止右键默认菜单
+
+            $tbody.on({
+                click: function () {
+                    // FIXME 修复实际未选择任何项时，仍然能够使子操作台显示的BUG
+                    $("#check-all-th").click(
+                        function () {
+                            var $span = $(this).find("span");
+                            if ($span.hasClass("checkbox--checked")) {
+                                $span.removeClass("checkbox--checked").addClass(
+                                    "checkbox--unchecked");
+                                // 取消全选
+                                $('.checkbox--checked').removeClass("checkbox--checked")
+                                    .addClass(
+                                        "checkbox--unchecked");
+                                unselect_all_items();
+                                // 没有选中的项，将子操作隐藏
+                                $("#sub-operate").hide();
+                            } else if ($span.hasClass("checkbox--unchecked")) {
+                                $span.removeClass("checkbox--unchecked").addClass(
+                                    "checkbox--checked");
+                                // 全选
+                                $('.checkbox--unchecked').removeClass("checkbox--unchecked")
+                                    .addClass(
+                                        "checkbox--checked");
+                                select_all_items();
+                                // 有选中的项，取消子操作的隐藏
+                                $("#sub-operate").show();
+                            }
+                        }
+                    );
+
+                    var $tr = $(this);
+                    var checked_cb = $tr.find(".checkbox--checked");
+                    var unchecked_cb = $tr.find(".checkbox--unchecked");
+                    if (checked_cb.length > 0) {
+                        // 取消选中
+                        checked_cb.removeClass("checkbox--checked").addClass("checkbox--unchecked");
+                        unselect_items([get_filename($tr)]);
+                        var $check_all_span = $("#check-all-th").find("span");
+                        if (current_selected_names.length == 0) {
+                            $check_all_span.removeClass("checkbox--checked").addClass(
+                                "checkbox--unchecked");
+                            // 没有选中的项，将子操作隐藏
+                            $("#sub-operate").hide();
+                        }
+                        // 只要取消某个选中，那么全选框就应该取消选中
+                        if ($check_all_span.hasClass("checkbox--checked")) {
+                            $check_all_span.removeClass("checkbox--checked").addClass(
+                                "checkbox--unchecked");
+                        }
+                    }
+                    if (unchecked_cb.length > 0) {
+                        // 选中
+                        unchecked_cb.removeClass("checkbox--unchecked").addClass(
+                            "checkbox--checked");
+                        select_items([get_filename($tr)]);
+                        if (current_unselected_names.length == 0) {
+                            $("#check-all-th").find("span").removeClass("checkbox--unchecked")
+                                .addClass(
+                                    "checkbox--checked");
+                        }
                         // 有选中的项，取消子操作的隐藏
                         $("#sub-operate").show();
                     }
-                }
-            )
-        );
-
-        var $tbody = $("#files-list tbody");
-        document.oncontextmenu = new Function("return false;"); //禁止右键默认菜单
-
-        $tbody.on({
-            click: function () {
-                var $tr = $(this);
-                var checked_cb = $tr.find(".checkbox--checked");
-                var unchecked_cb = $tr.find(".checkbox--unchecked");
-                if (checked_cb.length > 0) {
-                    // 取消选中
-                    checked_cb.removeClass("checkbox--checked").addClass("checkbox--unchecked");
-                    unselect_items([$tr.attr("id")]);
-                    var $check_all_span = $("#check-all-th").find("span");
-                    if (current_selected_ids.length == 0) {
-                        $check_all_span.removeClass("checkbox--checked").addClass("checkbox--unchecked");
-                        // 没有选中的项，将子操作隐藏
-                        $("#sub-operate").hide();
-                    }
-                    // 只要取消某个选中，那么全选框就应该取消选中
-                    if ($check_all_span.hasClass("checkbox--checked")) {
-                        $check_all_span.removeClass("checkbox--checked").addClass("checkbox--unchecked");
+                },
+                dblclick: function () {
+                    $this = $(this);
+                    // TODO 添加对非文件夹双击的处理逻辑
+                    if ($this.find(".folder-fill").length) {
+                        var name = get_filename($this);
+                        change_dir(name);
                     }
                 }
-                if (unchecked_cb.length > 0) {
-                    // 选中
-                    unchecked_cb.removeClass("checkbox--unchecked").addClass("checkbox--checked");
-                    select_items([$tr.attr("id")]);
-                    if (current_unselected_ids.length == 0) {
-                        $("#check-all-th").find("span").removeClass("checkbox--unchecked").addClass(
-                            "checkbox--checked");
-                    }
-                    // 有选中的项，取消子操作的隐藏
-                    $("#sub-operate").show();
-                }
-            },
-        }, "tr");
+            }, "tr");
 
-        $tbody.on({
-            mouseup: function (e) {
-                var $sub_op = $("#sub-operate");
-                if (e.which === 3) {
-                    $sub_op.addClass("pa");
-                    $sub_op.css({
-                        top: e.pageY - 10,
-                        left: e.pageX - 10
-                    });
-                } else {
-                    $sub_op.removeClass("pa");
-                }
-            }
-        });
-
-        $(document).mouseup(
-            function (e) {
-                if (e.which !== 3) {
+            $tbody.on({
+                mouseup: function (e) {
                     var $sub_op = $("#sub-operate");
-                    $sub_op.removeClass("pa");
+                    if (e.which === 3) {
+                        $sub_op.addClass("pa");
+                        $sub_op.css({
+                            top: e.pageY - 10,
+                            left: e.pageX - 10
+                        });
+                    } else {
+                        $sub_op.removeClass("pa");
+                    }
                 }
-            }
-        );
+            });
 
-        $("#btn-download").mouseup(
+            $(document).mouseup(
+                function (e) {
+                    if (e.which !== 3) {
+                        var $sub_op = $("#sub-operate");
+                        $sub_op.removeClass("pa");
+                    }
+                }
+            );
+            // TODO 下载功能
+            $("#btn-download").click(
+                function () {
+                    async_action("download", current_selected_names);
+                }
+            );
+            // TODO 重命名功能
+            $("#btn-rename").click(
 
-        );
-
-        $("#btn-rename").mouseup(
-
-        );
-
-        $("#btn-delete").mouseup(
-
-        );
+            );
+            // 删除所选文件
+            $("#btn-delete").click(function () {
+                remove_selected_items();
+            });
+            // 新建文件夹
+            $("#btn-add-folder").click(
+                function () {
+                    var new_folder_name = prompt("请输入新文件夹名称");
+                    if (new_folder_name) {
+                        async_action("mkdir",[new_folder_name,]);
+                    }
+                }
+            );
+            // 路径切换
+            $("#path-container").on("click", "span",
+                function () {
+                    $this = $(this);
+                    var i = $this.parent("div").index();
+                    if (i < current_workdir_path_items.length) {
+                        current_workdir_path_items = current_workdir_path_items.slice(null, i);
+                        async_action("query", null, function () {
+                            update_current_workdir();
+                        });
+                    }
+                }
+            );
+            // 刷新
+            $("#btn-reload").click(
+                function () {
+                    async_action("query");
+                }
+            );
+            // 后退
+            $("#btn-prev").click(
+                function () {
+                    current_workdir_path_items.splice(current_workdir_path_items.length - 1, 1);
+                    async_action("query", null, function () {
+                        update_current_workdir();
+                    });
+                }
+            );
+        });
     </script>
 
 </body>
