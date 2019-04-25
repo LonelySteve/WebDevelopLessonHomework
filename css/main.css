@@ -1,161 +1,286 @@
  /* 试着模仿Material-UI的风格 */
-
  body {
      background: url("https://api.dujin.org/bing/1920.php") fixed;
      background-repeat: no-repeat;
      background-size: cover;
  }
 
- .tip {
-     display: none;
-     color: red;
+ .bct {
+     background-color: transparent;
  }
 
- .panel {
+ .bc0 {
+     background-color: var(--theme-color-0);
+ }
+
+ .bc1 {
+     background-color: var(--theme-color-1);
+ }
+
+ .bc2 {
+     background-color: var(--theme-color-2);
+ }
+
+ .bc3 {
+     background-color: var(--theme-color-3);
+ }
+
+ .bc4 {
+     background-color: var(--background-color-0);
+ }
+
+ .bc5 {
+     background-color: var(--background-color-1);
+ }
+
+ .bc6 {
+     background-color: var(--background-color-2);
+ }
+
+ .bc7 {
+     background-color: var(--background-color-3);
+ }
+
+
+ .bc8 {
+     background-color: var(--background-color-4);
+ }
+
+ .bch0:hover {
+     background-color: var(--theme-color-0);
+ }
+
+ .bch1:hover {
+     background-color: var(--theme-color-1);
+ }
+
+ .bch2:hover {
+     background-color: var(--theme-color-2);
+ }
+
+ .bch3:hover {
+     background-color: var(--theme-color-3);
+ }
+
+ .bch4:hover {
+     background-color: var(--background-color-0);
+ }
+
+ .bch5:hover {
+     background-color: var(--background-color-1);
+ }
+
+ .bch6:hover {
+     background-color: var(--background-color-2);
+ }
+
+ .bch7:hover {
+     background-color: var(--background-color-3);
+ }
+
+ .bch8:hover {
+     background-color: var(--background-color-4);
+ }
+
+
+ .bca0:active {
+     background-color: var(--theme-color-0);
+ }
+
+ .bca1:active {
+     background-color: var(--theme-color-1);
+ }
+
+ .bca2:active {
+     background-color: var(--theme-color-2);
+ }
+
+ .bca3:active {
+     background-color: var(--theme-color-3);
+ }
+
+ .bca4:active {
+     background-color: var(--background-color-0);
+ }
+
+ .bca5:active {
+     background-color: var(--background-color-1);
+ }
+
+ .bca6:active {
+     background-color: var(--background-color-2);
+ }
+
+ .bca7:active {
+     background-color: var(--background-color-3);
+ }
+
+ .bca8:active {
+     background-color: var(--background-color-4);
+ }
+
+
+ .tc {
      text-align: center;
-     color: white;
-     background-color: rgba(101, 203, 255, 0.8);
-     border-radius: 6px;
-     width: 320px;
-     margin: 0 auto;
  }
 
- .btn {
+ .tl {
+     text-align: left;
+ }
+
+ .w10 {
+     width: 10px;
+ }
+
+ .w15 {
+     width: 15px;
+ }
+
+ .w18 {
+     width: 18px;
+ }
+
+ .w20 {
+     width: 20px;
+ }
+
+ .w35 {
+     width: 35px;
+ }
+
+ .w85pct {
+     width: 85%;
+ }
+
+ .w100pct {
      width: 100%;
+ }
+
+ .h18 {
+     height: 18px;
+ }
+
+ .h500 {
+     height: 500px;
+ }
+
+ .w18b::before {
+     width: 18px;
+ }
+
+ .h18b::before {
+     height: 18px;
+ }
+
+ .h40 {
      height: 40px;
-     font-size: 20px;
-     outline: none;
-     color: white;
-     background-color: #42a5f5;
-     border: none;
-     border-radius: 6px;
+ }
+
+ .mt10 {
      margin-top: 10px;
  }
 
- .btn:hover {
-     background-color: #64b5f6;
+ .ml5 {
+     margin-left: 5px;
  }
 
- .btn:active {
-     background-color: #2196f3;
+ .mr5 {
+     margin-right: 5px;
  }
 
- .edit {
-     border: none;
-     outline: none;
-     color: white;
-     border-bottom: 1.2px solid white;
-     line-height: 20px;
-     font-size: 20px;
-     height: 20px;
-     width: 250px;
-     background-color: transparent;
-     margin: 8px 0px;
+ .pr2 {
+     padding-right: 2px;
  }
 
- .edit::-webkit-input-placeholder {
-     /* WebKit, Blink, Edge */
-     color: white;
-     opacity: 0.5;
-     font-size: 18px;
+ .pr3 {
+     padding-right: 3px;
  }
 
- .edit:-moz-placeholder {
-     /* Mozilla Firefox 4 to 18 */
-     color: white;
-     opacity: 0.5;
-     font-size: 18px;
+ .pr5 {
+     padding-right: 5px;
  }
 
- .edit::-moz-placeholder {
-     /* Mozilla Firefox 19+ */
-     color: white;
-     opacity: 0.5;
-     font-size: 18px;
+ .pr8 {
+     padding-left: 8px;
  }
 
- .edit:-ms-input-placeholder {
-     /* Internet Explorer 10-11 */
-     color: white;
-     opacity: 0.5;
-     font-size: 18px;
+ .pl2 {
+     padding-left: 2px;
  }
 
- .stagger-table tbody {
-     /* 不允许HTML吞掉空格 */
-     white-space: pre
+ .pl3 {
+     padding-left: 3px;
  }
 
- .stagger-table {
-     border-collapse: collapse;
+ .pl5 {
+     padding-left: 5px;
  }
 
- .stagger-table th,
- .stagger-table td {
-     border: 1px solid white;
-     text-align: center;
-     padding: 10px;
+ .pl8 {
+     padding-left: 8px;
  }
 
- .stagger-table tr:nth-child(odd) {
-     background-color: #42a5f5;
+
+ .br6 {
+     border-radius: 6px;
  }
 
- .stagger-table tr:nth-child(even) {
-     background-color: #90caf9;
+ .db {
+     display: block;
  }
 
- .stagger-table th {
-     background-color: #1976d2;
+ .di {
+     display: inline;
  }
 
- .rd {
-     display: none;
-     /* 将原生的radio隐藏 */
- }
-
- /* label 模拟 “底部框” */
-
- .rd+label {
+ .dib {
      display: inline-block;
+ }
+
+ .dn {
+     display: none;
+ }
+
+ .o0 {
+     opacity: 0;
+ }
+
+ .fl {
+     float: left;
+ }
+
+ .pr {
      position: relative;
-     cursor: pointer;
+ }
+
+ .pa {
+     position: absolute;
+ }
+
+ .t2 {
      top: 2px;
-     width: 16px;
-     height: 16px;
-     border-radius: 50%;
-     background-color: white;
  }
 
- /* “label::before伪元素 模拟 “选择小圆块” */
-
- .rd+label:before {
-     content: '';
-     position: absolute;
-     top: 8px;
-     left: 8px;
-     z-index: 500;
-     width: 0;
-     height: 0;
-     border-radius: 50%;
-     background: white;
-     -webkit-transition: all 0.1s ease-in;
-     transition: all 0.1s ease-in;
+ .t10 {
+     top: 10px;
  }
 
- /* radio选中状态时，“底部框”的样式 */
-
- .rd:checked+label {
-     background: #1976d2;
+ .l10 {
+     left: 10px;
  }
 
- /* radio选中状态时，“选择小圆块”的样式 */
+ .oyx {
+     overflow-y: scroll;
+ }
 
- .rd:checked+label:before {
-     content: '';
-     position: absolute;
-     top: 4px;
-     left: 4px;
-     width: 8px;
-     height: 8px;
+ .oh {
+     overflow: hidden;
+ }
+
+ .toe {
+     text-overflow: ellipsis;
+ }
+
+ .disable-before::before {
+     content: none;
  }
