@@ -167,6 +167,10 @@ class Manager extends WalkableDir
 
     function __construct($upload_dir_path, $current_workdir)
     {
+        // 如果上传文件夹不存在，则创建一个新的文件夹
+        if (!is_dir($upload_dir_path)) {
+            mkdir($upload_dir_path);
+        }
         WalkableDir::__construct($upload_dir_path, $current_workdir);
         $cwd = $this->_get_realpath("");
         if (!is_dir($cwd)) {
