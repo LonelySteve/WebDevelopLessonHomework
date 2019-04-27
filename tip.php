@@ -49,7 +49,7 @@
                                     }
                                 }
                             }
-                            echo '<span class="text-primary">操作成功！</span>';
+                            echo '<span class="badge text-primary" style="font-size: 20px;background-color: green;">操作成功</span>';
                         } else if ($action == "withdraw") {
                             foreach ($_POST as $key => $value) {
                                 foreach ($_SESSION["purchased_items"] as $key1 => $value1) {
@@ -59,9 +59,15 @@
                                     }
                                 }
                             }
-                            echo '<span class="text-primary">操作成功！</span>';
+                            echo '<span class="badge text-primary" style="font-size: 20px;background-color: green;">操作成功</span>';
+                        } else {
+                            echo '<span class="badge text-primary" style="font-size: 20px;background-color: red;">操作失败</span>';
                         }
                         ?>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 20px;">
+                    <div class="col-xs-6 col-xs-push-3">
                         <a href="index.html" class="btn btn-default btn-block" role="button">返回</a>
                     </div>
                 </div>
