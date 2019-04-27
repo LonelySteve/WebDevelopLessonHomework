@@ -30,27 +30,28 @@
                 <form action="tip.php" method="post" role="form">
                     <div class="row">
                         <div class="col-xs-6 col-xs-push-3">
-                            <div class="form-group">
-
-                                <?php
-                                session_start();
-                                $item_names = array(
-                                    "item-1" => "篮球",
-                                    "item-2" => "排球",
-                                    "item-3" => "足球",
-                                    "item-4" => "桌球",
-                                    "item-5" => "气球"
-                                );
-                                if (isset($_SESSION["purchased_items"])) {
-                                    foreach ($_SESSION["purchased_items"] as $key => $value) {
-                                        echo '<div class="checkbox">';
-                                        echo '<label for="cb-' . $key . '">';
-                                        echo '<input type="checkbox" name="' . $key . '" id="cb-' . $key . '">' . $item_names[$key] . "  数量：" . $value;
-                                        echo '</label>';
-                                        echo '</div>';
+                            <div class="form-group text-justify">
+                                <div class="col-xs-offset-5">
+                                    <?php
+                                    session_start();
+                                    $item_names = array(
+                                        "item-1" => "篮球",
+                                        "item-2" => "排球",
+                                        "item-3" => "足球",
+                                        "item-4" => "桌球",
+                                        "item-5" => "气球"
+                                    );
+                                    if (isset($_SESSION["purchased_items"])) {
+                                        foreach ($_SESSION["purchased_items"] as $key => $value) {
+                                            echo '<div class="checkbox">';
+                                            echo '<label for="cb-' . $key . '">';
+                                            echo '<input type="checkbox" name="' . $key . '" id="cb-' . $key . '">' . $item_names[$key] . " " . '<span class="badge">' . $value . '</span>';
+                                            echo '</label>';
+                                            echo '</div>';
+                                        }
                                     }
-                                }
-                                ?>
+                                    ?>
+                                </div>
                             </div>
                             <input type="hidden" name="action" value="withdraw">
                             <button type="submit" id="btn-submit" class="btn btn-danger btn-block disabled">撤销</button>
