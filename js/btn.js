@@ -19,10 +19,10 @@
               function () {
                   $this = $(this);
                   if (get_selected_items_num() == 0) {
-                      $(".disabled").click(pd);
+                      $("#btn-submit").click(pd);
                       $("#btn-submit").addClass("disabled");
                   } else {
-                      $(".disabled").off("click");
+                      $("#btn-submit").off("click");
                       $("#btn-submit").removeClass("disabled");
                   }
               }
