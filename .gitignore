@@ -3,3 +3,4 @@
 lib/
 sql/
 vendor/
+.env

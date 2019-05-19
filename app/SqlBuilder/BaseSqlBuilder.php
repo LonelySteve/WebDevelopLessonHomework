@@ -1,6 +1,6 @@
 <?php
 
-namespace SteveBBS\sqlBuilder;
+namespace app\sqlBuilder;
 
 abstract class SqlBuilder
 {

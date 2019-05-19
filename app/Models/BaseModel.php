@@ -1,14 +1,20 @@
 <?php
 
-namespace SteveBBS\models;
+namespace app\models;
 
-class BaseModel{
+class BaseModel
+{
 
     protected $sql_meta_array = array();
     protected $sql_values_array = array();
     protected $sql_short_types_desc = "";
 
     protected const table_name = "";
+
+    static function init($db_addr, $db_user, $db_pass)
+    {
+        
+    }
 
     static function get_table_name()
     {
