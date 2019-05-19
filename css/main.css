@@ -1,0 +1,115 @@
+.text-color {
+  color: #59339d;
+}
+.main-panel {
+  border: #8c68ce solid 1px;
+}
+.main-panel > .panel-heading,
+.main-panel > .panel-footer {
+  border: none;
+  background: #b8a2e0;
+}
+.main-panel > .panel-body {
+  overflow-y: auto;
+}
+.main-panel > .panel-body::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 3.5px;
+}
+.main-panel > .panel-body::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  background: #b8a2e0;
+  border-radius: 1.5px;
+}
+.main-panel > .panel-body::-webkit-scrollbar-thumb:hover {
+  background: #9b7cd4;
+}
+.main-panel > .panel-body .card {
+  position: relative;
+  word-break: break-all;
+  border: #8c68ce solid 1px;
+}
+.main-panel > .panel-body .card a {
+  cursor: pointer;
+  color: #6F42C1 !important;
+  text-decoration: none !important;
+}
+.main-panel > .panel-body .card a:link,
+.main-panel > .panel-body .card a:visited,
+.main-panel > .panel-body .card a:hover,
+.main-panel > .panel-body .card a:active {
+  text-decoration: none !important;
+}
+.main-panel > .panel-body .card a:visited {
+  color: #6F42C1 !important;
+}
+.main-panel > .panel-body .card a:hover {
+  color: #8c68ce !important;
+  text-decoration: none !important;
+}
+.main-panel > .panel-body .card .panel-body .face {
+  margin-bottom: 10px;
+}
+.main-panel > .panel-body .card .panel-body .brief {
+  margin-top: 5px;
+}
+.main-panel > .panel-body .card .panel-body > .menu-group {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+.main-panel > .panel-body .card .panel-body > .menu-group .btn:active {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}
+.main-panel > .panel-body .card .panel-body > .menu-group > .dropdown-menu {
+  top: 35px;
+  left: -100px;
+  border: 1px solid #6F42C1;
+  box-shadow: 0 1px 5px #6F42C1;
+}
+.main-panel > .panel-body .card .panel-body > .menu-group > .dropdown-menu a:hover {
+  color: white !important;
+  background-color: #8c68ce;
+}
+.main-panel > .panel-body .card .panel-body > .menu-group > .dropdown-menu .divider {
+  background-color: #8c68ce;
+}
+.main-panel > .panel-footer .pagination {
+  float: left;
+  margin: 0 0;
+}
+.main-panel > .panel-footer .pagination > li > a {
+  background: #b8a2e0;
+  border: #8c68ce solid 1px;
+  color: #59339d;
+}
+.main-panel > .panel-footer .page-jump {
+  float: right;
+}
+.main-panel > .panel-footer .page-jump input[type="text"] {
+  display: inline-block;
+  width: 50px;
+  height: 34px;
+  text-align: center;
+  padding: 0 10px;
+  background: transparent;
+  color: #59339d;
+  border: #8c68ce solid 1px;
+  border-radius: 4px;
+}
+.main-panel > .panel-footer .page-jump input[type="text"]:focus {
+  box-shadow: none;
+}
+@media screen and (max-width: 768px) {
+  .main-panel > .panel-footer .pagination {
+    position: relative;
+    left: 50%;
+    clear: both;
+    float: none;
+    transform: translate(-50%, 0);
+  }
+  .main-panel > .panel-footer .page-jump {
+    display: none;
+  }
+}
