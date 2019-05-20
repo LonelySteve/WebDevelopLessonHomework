@@ -1,9 +1,13 @@
 <?php
 
-namespace app\sqlBuilder;
+namespace App\SqlBuilder;
 
-class MySqlBuilder extends SqlBuilder
+class MySqlBuilder extends BaseSqlBuilder
 {
+    function __construct($table_name)
+    {
+        $this->table_name = $table_name;
+    }
 
     /**
      * 判断指定数组是否为关联数组
@@ -16,10 +20,6 @@ class MySqlBuilder extends SqlBuilder
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
 
-    function __construct($table_name)
-    {
-        $this->table_name = $table_name;
-    }
 
     protected function get_columns_str($columns, $placeholder = false)
     {
@@ -49,11 +49,10 @@ class MySqlBuilder extends SqlBuilder
             if ($columns === "*") {
                 $columns = array();
             } else {
+                // 如果是字符串表示的列序列，以逗号（允许逗号后面有不定数量的空格）分隔得到列名数组
                 $columns = preg_split(", *", $columns);
             }
         }
-
-        $this->columns += $columns;
 
         $columns_str = $this->get_columns_str($columns);
         // 如果产生空字符串，说明列数组里没有元素，应当视作“我全都要”的含义
@@ -64,6 +63,13 @@ class MySqlBuilder extends SqlBuilder
         return $this;
     }
 
+
+    /**
+     * 插入指定数据
+     *
+     * @param array $data 欲插入的数据数组，既可以是关联数组，也可以是数字数组
+     * @return $this
+     */
     function insert($data)
     {
         $placeholder_arr = array_fill(0, count($data), "?");
@@ -71,41 +77,44 @@ class MySqlBuilder extends SqlBuilder
         if ($this->is_assoc($data)) {
             $cols = array_keys($data);
         } else {
-            // 对于数字数组，使用“?”填充列名
-            $cols = $placeholder_arr;
+            // 对于数字数组，列名数组置为空
+            $cols = null;
         }
 
-        $vals = array_values($data);
+        $this->values += array_values($data);
 
-        $this->columns += $cols;
-        $this->values += $vals;
+        if ($cols) {
+            $columns_str = $this->get_columns_str($cols);
+            $columns_str = "($columns_str)"; // NOTE: 包上括号，也许可以不加？
+        }
 
-        $columns_str = $this->get_columns_str($cols);
         $values_str = implode(", ", $placeholder_arr);
 
-        $this->segments[] = "INSERT INTO " . $this->table_name . "($columns_str)" . " VALUES ($values_str)";
+        $this->segments[] = "INSERT INTO " . $this->table_name . $columns_str . " VALUES ($values_str)";
 
         return $this;
     }
 
+
+    /**
+     * 更新指定数据
+     *
+     * @param array $data 欲更新的数据数组 TODO 支持数字数组
+     */
     function update($data)
     {
-
-        $placeholder_arr = array_fill(0, count($data), "?");
-
         if ($this->is_assoc($data)) {
             $cols = array_keys($data);
         } else {
-            // 对于数字数组，使用“?”填充列名
-            $cols = $placeholder_arr;
+            // 对于数字数组，列名数组置为空
+            $cols = null;
         }
 
-        $vals = array_values($data);
+        $this->values += array_values($data);
 
-        $columns_str = $this->get_columns_str($cols);
+        $columns_str = $this->get_columns_str($cols, true);
 
-        $columns_str = $this->get_columns_str($columns, true);
-
+        $this->segments[] = "UPDATE " . $this->table_name . " SET " . $columns_str;
     }
 
     function delete()
