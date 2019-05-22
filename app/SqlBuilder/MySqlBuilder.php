@@ -4,7 +4,7 @@ namespace App\SqlBuilder;
 
 class MySqlBuilder extends BaseSqlBuilder
 {
-    function __construct($table_name)
+    function __construct($table_name = "")
     {
         $this->table_name = $table_name;
     }
@@ -99,15 +99,15 @@ class MySqlBuilder extends BaseSqlBuilder
     /**
      * 更新指定数据
      *
-     * @param array $data 欲更新的数据数组 TODO 支持数字数组
+     * @param array $data 欲更新的数据数组
      */
     function update($data)
     {
         if ($this->is_assoc($data)) {
             $cols = array_keys($data);
         } else {
-            // 对于数字数组，列名数组置为空
-            $cols = null;
+            // TODO 支持数字数组作为参数
+            throw new \InvalidArgumentException("Numeric arrays are not supported for the time being!");
         }
 
         $this->values += array_values($data);
@@ -119,21 +119,46 @@ class MySqlBuilder extends BaseSqlBuilder
 
     function delete()
     {
-        // TODO: Implement delete() method.
+        $this->segments[] = "DELETE FROM " . $this->table_name;
     }
 
     function limit($offset, $size = null)
     {
-        // TODO: Implement limit() method.
+        $this->segments[] = "LIMIT ?" . $size ? ",?" : "";
+        $this->values += [$offset, $size];
     }
 
-    function order_by($columns, $type)
+    /**
+     * 按照指定关键字及排序规则进行排序
+     *
+     * @param array $data 既可以是数字数组，也可以是关联数组，甚至可以是两者的混合体
+     * 作为数字数组时，默认以值表示的列进行升序。作为关联数组时，使用键表示的列进行排序，排序规则由值表示，对于MySQL而言，这可以为ASC或DESC
+     */
+    function order_by($data)
     {
-        // TODO: Implement order_by() method.
+        foreach ($data as $key => $value) {
+            if (is_int($key)) {
+                $parts[] = $value;
+            } else {
+                $parts[] = "$key $value";
+            }
+        }
+        $this->segments[] = "ORDER BY " . implode(", ", $parts);
     }
 
-    function where()
+    function where($conditions)
     {
-        // TODO: Implement where() method.
+        $conditions_count = count($conditions);
+
+        if ($conditions_count > 3) {
+            throw new \InvalidArgumentException("The number of conditional array parameters cannot be more than three!");
+        }
+        // 判断条件数组的长度，如果为2则在中间插入=
+        if (count($conditions) === 2) {
+            $conditions = $conditions[0] + ["="] + $conditions[1];
+        }
+        // 懒得判断符号是否有效了，就直接合到SQL语句里得了
+        $this->segments[] = "WHRER " . $conditions[0] . $conditions[1] . "?";
+        $this->values[] = $conditions[2];
     }
 }
