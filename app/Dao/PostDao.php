@@ -5,20 +5,29 @@ namespace App\Dao;
 
 use App\Config\DBConfig;
 use App\Entity\Post;
-use App\SqlBuilder\SqlBuilderFactory;
 
 class PostDao extends BaseDao
 {
-    public function __construct(DBConfig $db_config = null, SqlBuilderFactory $factory = null)
-    {
-        parent::__construct($db_config, $factory);
-        // 设置表名
-        $this->sql_builder->table_name = "posts";
-    }
+    protected const table_name = "posts";
+    protected const primary_key_name = "pid";
 
-    public function insert(Post $post)
+    public function append(Post $post)
     {
-        $sql = $this->sql_builder->insert((array)$post);
-        $pdo = new \PDO($this->db_config->db_addr, $this->db_config->db_user, $this->db_config->db_pass);
+        $sql_builder = $this->get_sql_builder_instance();
+
+        $sql = $sql_builder->insert([
+            null,
+            $post->name,
+            $post->email,
+            $post->title,
+            $post->content,
+            $post->create_time,
+            $post->replay,
+            $post->replay_aid,
+            $post->replay_create_time,
+            $post->state
+        ])->dump();
+
+        return $this->execute_sql($sql, $sql_builder->get_values());
     }
 }

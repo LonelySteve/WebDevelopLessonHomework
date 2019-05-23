@@ -1,8 +1,9 @@
 <?php
 
 
-namespace app\validator;
+namespace App\Validators;
 
+use App\Dao\BaseDao;
 use app\exceptions\VerificationException;
 
 class Validator
@@ -113,6 +114,12 @@ class DataValidator extends Validator
         return new NumberValidator($data);
     }
 
+    function is_id($dao_cls_name, $construct_params)
+    {
+        $data = $this->is_number()->get_data();
+        return new DaoRecordIdValidator($data, $dao_cls_name, $construct_params);
+    }
+
     function is_string()
     {
         $this->assert_callback(function () {
@@ -189,13 +196,33 @@ class NumberValidator extends Validator
     }
 }
 
+class DaoRecordIdValidator extends NumberValidator
+{
+    public $dao_instance;
+
+    protected static $type = "id";
+
+    public function __construct($data, $dao_cls_name, $construct_params)
+    {
+        $construct_params = $construct_params ?: [];
+        $this->dao_instance = new $dao_cls_name(...$construct_params);
+        parent::__construct($data);
+    }
+
+    public function exist()
+    {
+        return $this->assert_callback(function () {
+            return $this->dao_instance->exist($this->data);
+        }, "specifies that the id record does not exist!");
+    }
+}
+
 class StringValidator extends Validator
 {
     protected static $type = "string";
 
     function match_regex($regex)
     {
-
         return $this->assert_callback(function () use ($regex) {
             return preg_match($regex, $this->data);
         }, "does not match the specified regular expression"
@@ -230,5 +257,11 @@ class TimestampValidator extends NumberValidator
     function in_the_future()
     {
         return $this->min(time());
+    }
+
+    function is_latest($allowed_error_range = 5)
+    {
+        $current_timestamp = time();
+        return $this->min($current_timestamp - $allowed_error_range)->max($current_timestamp + $allowed_error_range);
     }
 }

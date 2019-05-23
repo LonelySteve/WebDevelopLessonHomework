@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Services\PostService;
+
 class PostController extends BaseController
 {
-    public function add($title, $content, $name, $email, $create_time, $replay, $replay_time, $state)
+    public function append($request)
     {
 
     }
@@ -21,6 +23,6 @@ class PostController extends BaseController
 
     function index($offset, $size)
     {
-        // TODO: Implement index() method.
+
     }
 }

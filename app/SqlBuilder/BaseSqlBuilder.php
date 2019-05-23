@@ -10,34 +10,65 @@ abstract class BaseSqlBuilder
 
     public $table_name = "";
 
-    abstract function select($columns = null);
+    function __construct($table_name = "")
+    {
+        $this->table_name = $table_name;
+    }
 
-    abstract function insert($data);
+    function select($columns = null)
+    {
+        return $this;
+    }
 
-    abstract function update($data);
+    function insert($data)
+    {
+        return $this;
+    }
 
-    abstract function delete();
+    function update($data)
+    {
+        return $this;
+    }
 
-    abstract function limit($offset, $size = null);
+    function delete()
+    {
+        return $this;
+    }
 
-    abstract function order_by($data);
+    function limit($offset, $size = null)
+    {
+        return $this;
+    }
 
-    abstract function where($conditions);
+    function order_by($data)
+    {
+        return $this;
+    }
+
+    function where($conditions)
+    {
+        return $this;
+    }
 
     function dump()
     {
         // 用空格间隔拼凑所有sql语句片段即可
         return implode(" ", $this->segments);
     }
+
+    function get_values()
+    {
+        return $this->values;
+    }
 }
 
 class SqlBuilderFactory
 {
-    static function from_type($name, $table_name = "")
+    static function from_type($name)
     {
         switch ($name) {
             case "mysql":
-                return new MySqlBuilder($table_name);
+                return MySqlBuilder::class;
             default:
                 throw new \InvalidArgumentException("Unsupported database type!");
         }

@@ -4,11 +4,6 @@ namespace App\SqlBuilder;
 
 class MySqlBuilder extends BaseSqlBuilder
 {
-    function __construct($table_name = "")
-    {
-        $this->table_name = $table_name;
-    }
-
     /**
      * 判断指定数组是否为关联数组
      *
