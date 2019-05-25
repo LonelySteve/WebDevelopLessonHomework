@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Throwable;
 
-class VerificationException extends \RuntimeException
+class VerificationException extends BaseException
 {
     public static $err_code;
 

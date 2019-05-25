@@ -1,10 +1,13 @@
 {
-    "require": {
-        "smarty/smarty": "~3.1",
-        "vlucas/phpdotenv": "^3.3",
-        "ext-pdo": "*"
-    },
-    "autoload": {
-        "classmap": ["app/"]
-    }
+  "require": {
+    "smarty/smarty": "~3.1",
+    "vlucas/phpdotenv": "^3.3",
+    "ext-pdo": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "classmap": [
+      "app/"
+    ]
+  }
 }

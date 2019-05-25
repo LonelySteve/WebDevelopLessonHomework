@@ -13,13 +13,15 @@ class Request
     public $form;
     public $args;
 
-    public function __construct()
+    public static function wrap()
     {
-        $this->args = $_GET;
-        $this->form = $_POST;
-        $this->method = $_SERVER["REQUEST_METHOD"];
-        $this->path = $_SERVER["PHP_SELF"];
-        $this->header = getallheaders();
-        $this->cookie = $_COOKIE;
+        $r = new Request();
+        $r->args = $_GET;
+        $r->form = $_POST;
+        $r->method = $_SERVER["REQUEST_METHOD"];
+        $r->path = $_SERVER["PHP_SELF"];
+        $r->header = getallheaders();
+        $r->cookie = $_COOKIE;
+        return $r;
     }
 }
