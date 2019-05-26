@@ -3,7 +3,6 @@
 
 namespace App\Dao;
 
-use App\Config\DBConfig;
 use App\Entity\Post;
 
 class PostDao extends BaseDao

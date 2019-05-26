@@ -16,11 +16,11 @@ abstract class BaseDao
     protected const table_name = "";
     protected const primary_key_name = "id";
 
-    function __construct(DBConfig $db_config = null)
+    function __construct(DBConfig $db_config)
     {
-        $this->db_config = $db_config ?: DBConfig::from_dot_env();
+        $this->db_config = $db_config;
         $this->sql_builder_cls = SqlBuilderFactory::from_type($this->db_config->db_type);
-        $this->pdo = new \PDO($this->db_config->get_dsn(), $this->db_config->db_user, $this->db_config->db_pass, array(\PDO::ERRMODE_EXCEPTION));
+        $this->pdo = $db_config->get_pdo();
     }
 
     /**

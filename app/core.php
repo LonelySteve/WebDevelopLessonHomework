@@ -1,42 +1,74 @@
 <?php
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use App\Http\Request;
 use app\models\BaseModel;
+use App\Exceptions\BaseException;
+use App\Config\Config;
 
-function init()
+abstract class Core
 {
-    // 加载环境变量
-    $GLOBALS["bbs_conf"] = Config::get_config();
-    // 初始化模型基类
-    BaseModel::init($bbs_conf["DB_ADDR"], $bbs_conf["DB_USER"], $bbs_conf["DB_PASS"]);
-}
+    // 定义过滤器数组
+    public $FILTERS = [];
+    public $config;
 
-// 定义过滤器数组
-$FILTERS = [];
+    function config()
+    {
+        $this->config = Config::from_dot_env();
+    }
 
-function main($request)
-{
+    function init()
+    {
+        // 加载全局配置
+        $this->config();
+    }
+
     // 包含的php实现该函数以完成业务逻辑
-}
+    abstract function main(Request $request);
 
-function apply_filters($request)
-{
-    foreach ($FILTERS as $filter) {
-        // 如果过滤器对象调用结果为真则继续调用其余过滤器，直到返回假
-        if (!$filter($request)) {
-            return false;
+    function apply_filters(Request $request)
+    {
+        foreach ($this->FILTERS as $filter) {
+            // 如果过滤器对象调用结果为真则继续调用其余过滤器，直到返回假
+            try {
+                $filter($request);
+            } catch (BaseException $ex) {
+                $code = $ex->get_code();
+                $msg = $ex->get_msg();
+            }
         }
     }
-    return true;
-}
-// 初始化
-init();
-// 包装当前请求
-$r = Request::wrap();
-// 依次应用过滤器
-if(apply_filters($r)){
-    // 通过所有过滤器的请求将进入主函数
-    main($r);
-}
 
+    // 子类继承可重写
+    protected function handle()
+    {
+        // 初始化
+        $this->init();
+        // 包装请求
+        $r = Request::wrap();
+        // 过滤器筛选
+        $this->apply_filters($r);
+        // 主业务逻辑
+        $this->main($r);
+    }
 
+    // 提供给外部调用
+    function handle_request()
+    {
+        try {
+            $this->handle();
+        } catch (BaseException $ex) {
+            // 如果是Debug模式，则直接抛出该异常
+            if (@$this->config->debug_mode ?: false) {
+                throw $th;
+            }
+            echo "出现自定义异常！！" . $th->get_msg();
+        } catch (Throwable $th) {
+            // 如果是Debug模式，则直接抛出该异常
+            if (@$this->config->debug_mode ?: false) {
+                throw $th;
+            }
+        }
+    }
+}

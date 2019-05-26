@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../app/core.php";
+require_once __DIR__ . "/../../app/core.php";
 
 use App\Http\Response;
 use App\Controller\PostController;
@@ -13,8 +13,8 @@ class IndexCore extends Core
 
     function main(\App\Http\Request $request)
     {
-        $page = $request->form["page"];
-        $size = $request->form["size"];
+        $page = $request->args["page"];
+        $size = $request->args["size"];
 
         $controller = new PostController();
 

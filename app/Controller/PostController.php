@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Services\PostService;
+use App\Dao\PostDao;
+use App\Entity\Post;
 
 class PostController extends BaseController
 {
@@ -23,6 +25,6 @@ class PostController extends BaseController
 
     function index($offset, $size)
     {
-
+        return (new PostDao())->query($offset, $size)->fetchObject(Post::class);
     }
 }

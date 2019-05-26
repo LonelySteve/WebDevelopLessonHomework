@@ -9,12 +9,6 @@ class DBConfig
     public $db_user;
     public $db_pass;
 
-    static function from_dot_env($paths = null)
-    {
-        $conf = Config::from_dot_env(null);
-        return new self($conf["DB_ADDR"], $conf["DB_NAME"], $conf["DB_USER"], $conf["DB_PASS"], $conf["DB_TYPE"]);
-    }
-
     function __construct($db_addr, $db_name, $db_user, $db_pass, $db_type = "mysql")
     {
         $this->db_addr = $db_addr;
@@ -31,5 +25,10 @@ class DBConfig
         $host = $this->db_addr;     // 使用的主机名称
 
         return "$dbms:host=$host;dbName=$dbName ";
+    }
+
+    function get_pdo()
+    {
+        return new \PDO($this->get_dsn(), $this->db_user, $this->db_pass, array(\PDO::ERRMODE_EXCEPTION));
     }
 }
