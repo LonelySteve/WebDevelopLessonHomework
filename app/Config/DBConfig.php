@@ -24,11 +24,12 @@ class DBConfig
         $dbName = $this->db_name;   // 使用的数据库名称
         $host = $this->db_addr;     // 使用的主机名称
 
-        return "$dbms:host=$host;dbName=$dbName ";
+        return "$dbms:host=$host;dbname=$dbName";
     }
 
     function get_pdo()
     {
-        return new \PDO($this->get_dsn(), $this->db_user, $this->db_pass, array(\PDO::ERRMODE_EXCEPTION));
+        $dsn = $this->get_dsn();
+        return new \PDO($dsn, $this->db_user, $this->db_pass, array(\PDO::ERRMODE_EXCEPTION, \PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8mb4"));
     }
 }

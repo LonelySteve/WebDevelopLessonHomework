@@ -32,6 +32,6 @@ class Response
         if ($data) {
             $base += ["data" => $data];
         }
-        echo json_encode($base);
+        echo json_encode($base, JSON_UNESCAPED_UNICODE);
     }
 }

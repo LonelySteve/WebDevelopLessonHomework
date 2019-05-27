@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Services\PostService;
 use App\Dao\PostDao;
 use App\Entity\Post;
 
@@ -25,6 +24,6 @@ class PostController extends BaseController
 
     function index($offset, $size)
     {
-        return (new PostDao())->query($offset, $size)->fetchObject(Post::class);
+        return (new PostDao($this->db_config))->query($offset, $size)->fetchAll(\PDO::FETCH_CLASS);
     }
 }

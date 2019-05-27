@@ -18,6 +18,10 @@ class MySqlBuilder extends BaseSqlBuilder
 
     protected function get_columns_str($columns, $placeholder = false)
     {
+        // 如果 $columns 为空，返回空字符串
+        if (!$columns) {
+            return "";
+        }
         // 如果 $columns 是字符串 则直接返回
         if (is_string($columns)) {
             return $columns;
@@ -110,17 +114,23 @@ class MySqlBuilder extends BaseSqlBuilder
         $columns_str = $this->get_columns_str($cols, true);
 
         $this->segments[] = "UPDATE " . $this->table_name . " SET " . $columns_str;
+
+        return $this;
     }
 
     function delete()
     {
         $this->segments[] = "DELETE FROM " . $this->table_name;
+
+        return $this;
     }
 
     function limit($offset, $size = null)
     {
-        $this->segments[] = "LIMIT ?" . $size ? ",?" : "";
+        $this->segments[] = "LIMIT ?" . ($size ? ",?" : "");
         $this->values += [$offset, $size];
+
+        return $this;
     }
 
     /**
@@ -139,6 +149,8 @@ class MySqlBuilder extends BaseSqlBuilder
             }
         }
         $this->segments[] = "ORDER BY " . implode(", ", $parts);
+
+        return $this;
     }
 
     function where($conditions)
@@ -155,5 +167,7 @@ class MySqlBuilder extends BaseSqlBuilder
         // 懒得判断符号是否有效了，就直接合到SQL语句里得了
         $this->segments[] = "WHRER " . $conditions[0] . $conditions[1] . "?";
         $this->values[] = $conditions[2];
+
+        return $this;
     }
 }

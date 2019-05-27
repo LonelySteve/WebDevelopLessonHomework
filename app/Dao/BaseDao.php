@@ -15,6 +15,31 @@ abstract class BaseDao
     // 实现的子类应重写该常量
     protected const table_name = "";
     protected const primary_key_name = "id";
+    protected const field_value_types = [];
+
+    static function get_table_name()
+    {
+        $cls = get_called_class();
+        return $cls::table_name;
+    }
+
+    static function get_primary_key_name()
+    {
+        $cls = get_called_class();
+        return $cls::primary_key_name;
+    }
+
+    static function get_field_value_types($fields_name = null)
+    {
+        $cls = get_called_class();
+        if (!$fields_name) {
+            return $cls::field_value_types;
+        }
+        foreach ($fields_name as $field) {
+            $temp_arr[] = $cls::field_value_types[$field];
+        }
+        return $temp_arr;
+    }
 
     function __construct(DBConfig $db_config)
     {
@@ -30,14 +55,22 @@ abstract class BaseDao
      */
     protected function get_sql_builder_instance()
     {
-        return new $this->sql_builder_cls(self::table_name);
+        return new $this->sql_builder_cls(self::get_table_name());
     }
 
-    protected function execute_sql($sql, $data)
+    protected function execute_sql($sql, $data, $pdo_value_types)
     {
         $stat = $this->pdo->prepare($sql);
         if ($stat) {
-            $stat->execute($data);
+            foreach ($pdo_value_types as $key => $value) {
+                // 为毛问号占位符从 1 开始计数啊！！！
+                if (is_int($key)) {
+                    $stat->bindValue($key + 1, $data[$key], $value);
+                } else {
+                    $stat->bindValue($key, $data[$key], $value);
+                }
+            }
+            $stat->execute();
         }
 
         return $stat;
@@ -47,36 +80,36 @@ abstract class BaseDao
     {
         $sql_builder = $this->get_sql_builder_instance();
 
-        $sql = $sql_builder->select()->limit($offset, $size)->order_by([self::primary_key_name => "DESC"]);
+        $sql = $sql_builder->select()->order_by([self::get_primary_key_name() => "DESC"])->limit($offset, $size)->dump();
 
-        return $this->execute_sql($sql, $sql_builder->get_values());
+        return $this->execute_sql($sql, $sql_builder->get_values(), [\PDO::PARAM_INT, \PDO::PARAM_INT]);
     }
 
     public function delete($id)
     {
         $sql_builder = $this->get_sql_builder_instance();
 
-        $sql = $sql_builder->delete()->where([self::primary_key_name, $id]);
+        $sql = $sql_builder->delete()->where([self::get_primary_key_name(), $id]);
 
-        return $this->execute_sql($sql, $sql_builder->get_values());
+        return $this->execute_sql($sql, $sql_builder->get_values(), [\PDO::PARAM_INT]);
     }
 
     public function update($id, $data)
     {
         $sql_builder = $this->get_sql_builder_instance();
 
-        $sql = $sql_builder->update($data)->where([self::primary_key_name, $id]);
+        $sql = $sql_builder->update($data)->where([self::get_primary_key_name(), $id])->dump();
 
-        return $this->execute_sql($sql, $sql_builder->get_values());
+        return $this->execute_sql($sql, $sql_builder->get_values(), self::get_field_value_types($data));
     }
 
     public function exist($id)
     {
         $sql_builder = $this->get_sql_builder_instance();
 
-        $sql = $sql_builder->select()->where([self::primary_key_name, $id])->limit(1);
+        $sql = $sql_builder->select()->where([self::get_primary_key_name(), $id])->limit(1)->dump();
 
-        $stmt = $this->execute_sql($sql, $sql_builder->get_values());
+        $stmt = $this->execute_sql($sql, $sql_builder->get_values(), [\PDO::PARAM_INT]);
         return boolval($stmt->rowCount());
     }
 }

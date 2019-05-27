@@ -13,13 +13,11 @@ class IndexCore extends Core
 
     function main(\App\Http\Request $request)
     {
-        $page = $request->form["page"];
-        $size = $request->form["size"];
-
-        $controller = new PostController();
+        $controller = new PostController($this->config->db_config);
 
         $r = new Response();
-        $r->jsonify($controller->index($page, $size));
+        $data = $controller->index(0, 10);
+        $r->jsonify($data);
     }
 
 }
