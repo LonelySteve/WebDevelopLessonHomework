@@ -23,7 +23,7 @@ class Config
     {
     }
 
-    static function from_dot_env($paths = null)
+    static function load($paths = null)
     {
         // 如果配置缓存无效则读取配置并缓存配置
         if (!self::$instance) {

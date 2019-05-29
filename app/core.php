@@ -15,7 +15,7 @@ abstract class Core
 
     function config()
     {
-        $this->config = Config::from_dot_env();
+        $this->config = Config::load();
     }
 
     function init()
