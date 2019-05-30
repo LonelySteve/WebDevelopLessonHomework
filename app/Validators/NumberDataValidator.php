@@ -3,7 +3,7 @@
 namespace App\Validators;
 
 
-class NumberValidator extends Validator
+class NumberDataValidator extends DataValidator
 {
     protected static $type = "number";
 
@@ -11,7 +11,7 @@ class NumberValidator extends Validator
     {
         $result = [];
         $this->append_callback(function ($data) use ($result) {
-            return preg_match("^-?([1-9]\d*|0)(\.\d+)?$", $data, $result);
+            return preg_match("/^-?([1-9]\d*|0)(\.\d+)?$/", $data, $result);
         });
     }
 

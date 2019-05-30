@@ -82,6 +82,7 @@ class MySqlBuilder extends BaseSqlBuilder
 
         $this->values += array_values($data);
 
+        $columns_str = "";
         if ($cols) {
             $columns_str = $this->get_columns_str($cols);
             $columns_str = "($columns_str)"; // NOTE: 包上括号，也许可以不加？

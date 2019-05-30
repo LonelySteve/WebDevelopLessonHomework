@@ -12,7 +12,7 @@ abstract class BaseDao
     protected $db_config;
     protected $pdo;
     protected $sql_builder_cls;
-    // 实现的子类应重写该常量
+    // 实现的子类应重写下面的常量
     protected const table_name = "";
     protected const primary_key_name = "id";
     protected const field_value_types = [];

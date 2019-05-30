@@ -7,9 +7,9 @@ use App\Entity\Post;
 
 class PostController extends BaseController
 {
-    public function append($request)
+    public function append($post)
     {
-
+        (new PostDao($this->db_config))->append($post);
     }
 
     public function del($pid)
@@ -24,6 +24,10 @@ class PostController extends BaseController
 
     function index($offset, $size)
     {
-        return (new PostDao($this->db_config))->query($offset, $size)->fetchAll(\PDO::FETCH_CLASS);
+        $result = (new PostDao($this->db_config))->query($offset, $size)->fetchObject(Post::class);
+        if (!$result) {
+            return [];
+        }
+        return $result;
     }
 }

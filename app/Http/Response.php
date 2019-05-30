@@ -29,7 +29,7 @@ class Response
     {
         header("content-type: application/json");
         $base = ["code" => $code, "message" => $msg];
-        if ($data) {
+        if ($data !== null) {
             $base += ["data" => $data];
         }
         echo json_encode($base, JSON_UNESCAPED_UNICODE);

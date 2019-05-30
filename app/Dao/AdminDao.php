@@ -10,6 +10,10 @@ class AdminDao extends BaseDao
 {
     protected const table_name = "admins";
     protected const primary_key_name = "aid";
+    protected const field_value_types = [
+        "username" => \PDO::PARAM_STR,
+        "password" => \PDO::PARAM_STR
+    ];
 
     public function append(Admin $admin)
     {
@@ -21,6 +25,6 @@ class AdminDao extends BaseDao
             $admin->password
         ])->dump();
 
-        return $this->execute_sql($sql, $sql_builder->get_values());
+        return $this->execute_sql($sql, $sql_builder->get_values(), self::get_field_value_types());
     }
 }

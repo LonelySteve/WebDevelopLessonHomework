@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Filters;
+namespace App\Filters;
 
 use App\Http\Request;
 
@@ -12,7 +12,7 @@ abstract class BaseFilter
         header("Location: $path;");
     }
 
-    function __call(Request $request)
+    function pass(Request $request)
     {
         return true;
     }

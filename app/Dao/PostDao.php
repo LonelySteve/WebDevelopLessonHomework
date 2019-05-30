@@ -9,6 +9,17 @@ class PostDao extends BaseDao
 {
     protected const table_name = "posts";
     protected const primary_key_name = "pid";
+    protected const field_value_types = [
+        "name" => \PDO::PARAM_STR,
+        "email" => \PDO::PARAM_STR,
+        "title" => \PDO::PARAM_STR,
+        "content" => \PDO::PARAM_STR,
+        "create_time" => \PDO::PARAM_STR,
+        "replay" => \PDO::PARAM_STR,
+        "replay_aid" => \PDO::PARAM_INT,
+        "replay_create_time" => \PDO::PARAM_STR,
+        "state" => \PDO::PARAM_INT
+    ];
 
     public function append(Post $post)
     {
@@ -27,6 +38,6 @@ class PostDao extends BaseDao
             $post->state
         ])->dump();
 
-        return $this->execute_sql($sql, $sql_builder->get_values());
+        return $this->execute_sql($sql, $sql_builder->get_values(), self::get_field_value_types());
     }
 }

@@ -5,7 +5,7 @@ namespace App\Validators;
 
 
 
-class StringValidator extends Validator
+class StringDataValidator extends DataValidator
 {
     function match_regex($regex)
     {

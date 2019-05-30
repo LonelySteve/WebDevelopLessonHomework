@@ -24,4 +24,18 @@ class Request
         $r->cookie = $_COOKIE;
         return $r;
     }
+
+    public function get_input()
+    {
+        return $this->form + $this->args;
+    }
+
+    public function set_input($name, $value)
+    {
+        if (array_key_exists($name, $this->args)) {
+            $this->args[$name] = $value;
+        } else {
+            $this->form[$name] = $value;
+        }
+    }
 }

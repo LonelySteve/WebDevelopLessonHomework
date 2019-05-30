@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Filters;
+namespace App\Filters;
 
 
 use App\Http\Request;
