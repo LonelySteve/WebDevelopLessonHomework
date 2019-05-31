@@ -7,9 +7,9 @@ use App\Entity\Post;
 
 class PostController extends BaseController
 {
-    public function append($post)
+    public function append($title, $content, $name, $email, $homepage, $state = 0)
     {
-        (new PostDao($this->db_config))->append($post);
+        (new PostDao($this->db_config))->append($title, $content, $name, $email, $homepage, $state);
     }
 
     public function del($pid)
@@ -22,12 +22,8 @@ class PostController extends BaseController
 
     }
 
-    function index($offset, $size)
+    function index($page, $size)
     {
-        $result = (new PostDao($this->db_config))->query($offset, $size)->fetchObject(Post::class);
-        if (!$result) {
-            return [];
-        }
-        return $result;
+        return (new PostDao($this->db_config))->index($page, $size);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Validators;
 
 
 
-class TimestampValidator extends NumberDataValidator
+class TimestampDataValidator extends NumberDataValidator
 {
     protected static $type = "timestamp";
 

@@ -6,6 +6,6 @@ namespace App\Exceptions;
 
 class AuthException extends BaseException
 {
-    protected $code = -500;
-    protected $message = "unauthorized error!";
+    protected $default_code = -500;
+    protected $message_prefix = "unauthorized error";
 }

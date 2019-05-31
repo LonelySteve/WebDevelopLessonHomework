@@ -71,6 +71,7 @@ class MySqlBuilder extends BaseSqlBuilder
      */
     function insert($data)
     {
+        // TODO 命名参数支持
         $placeholder_arr = array_fill(0, count($data), "?");
 
         if ($this->is_assoc($data)) {
@@ -80,7 +81,7 @@ class MySqlBuilder extends BaseSqlBuilder
             $cols = null;
         }
 
-        $this->values += array_values($data);
+        $this->values += $data;
 
         $columns_str = "";
         if ($cols) {
@@ -103,6 +104,7 @@ class MySqlBuilder extends BaseSqlBuilder
      */
     function update($data)
     {
+        // TODO 命名参数支持
         if ($this->is_assoc($data)) {
             $cols = array_keys($data);
         } else {
@@ -110,7 +112,7 @@ class MySqlBuilder extends BaseSqlBuilder
             throw new \InvalidArgumentException("Numeric arrays are not supported for the time being!");
         }
 
-        $this->values += array_values($data);
+        $this->values += $data;
 
         $columns_str = $this->get_columns_str($cols, true);
 

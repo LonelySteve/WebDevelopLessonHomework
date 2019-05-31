@@ -6,6 +6,7 @@ namespace App\Dao;
 use App\Config\DBConfig;
 use App\SqlBuilder;
 use App\SqlBuilder\SqlBuilderFactory;
+use App\exceptions\SqlExecuteException;
 
 abstract class BaseDao
 {
@@ -62,15 +63,23 @@ abstract class BaseDao
     {
         $stat = $this->pdo->prepare($sql);
         if ($stat) {
-            foreach ($pdo_value_types as $key => $value) {
+            foreach ($data as $key => $value) {
                 // 为毛问号占位符从 1 开始计数啊！！！
                 if (is_int($key)) {
-                    $stat->bindValue($key + 1, $data[$key], $value);
+                    $stat->bindValue($key + 1, $value, next($pdo_value_types));
                 } else {
-                    $stat->bindValue($key, $data[$key], $value);
+                    $stat->bindValue($key, $value, $pdo_value_types[$key]);
                 }
             }
+            // TODO 也许可以不需要这个reset
+            reset($pdo_value_types);
+            // 执行SQL
             $stat->execute();
+        }
+        // 判断SQL是否执行成功，未成功则抛出异常
+        $info = $stat->errorInfo();
+        if ($info !== "00000") {
+            throw new SqlExecuteException($info[2]);
         }
 
         return $stat;

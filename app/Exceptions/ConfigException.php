@@ -4,6 +4,8 @@
 namespace App\Exceptions;
 
 
+use Throwable;
+
 /**
  * ConfigException
  * 属于非用户操作导致的异常
@@ -12,5 +14,5 @@ namespace App\Exceptions;
 class ConfigException extends BaseException
 {
     protected $code = -10;
-    protected $message = "configuration load error!";
+    protected $message_prefix = "configuration load error";
 }

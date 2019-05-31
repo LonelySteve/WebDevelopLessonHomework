@@ -24,7 +24,7 @@ class IndexCore extends Core
 
         $input = $request->get_input();
 
-        $data = $controller->index($input["p"] - 1, $input["size"]);
+        $data = $controller->index($input["p"], $input["size"]);
         $r = new Response();
         $r->jsonify($data);
     }
