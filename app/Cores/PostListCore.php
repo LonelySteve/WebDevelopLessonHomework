@@ -1,13 +1,15 @@
 <?php
 
-require_once __DIR__ . "/../app/core.php";
 
-use App\Http\Response;
-use App\Filters\InputFilter;
-use App\Validators\NumberDataValidator;
+namespace App\Cores;
+
+
 use App\Controller\PostController;
+use App\Filters\InputFilter;
+use App\Http\Response;
+use App\Validators\NumberDataValidator;
 
-class IndexCore extends Core
+class PostListCore extends BaseCore
 {
     function __construct()
     {
@@ -29,8 +31,3 @@ class IndexCore extends Core
         $r->jsonify($data);
     }
 }
-
-$c = new IndexCore();
-
-$c->handle_request();
-

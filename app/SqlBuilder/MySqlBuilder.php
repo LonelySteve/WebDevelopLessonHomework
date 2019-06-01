@@ -2,19 +2,14 @@
 
 namespace App\SqlBuilder;
 
+use App\Util\Util;
+
 class MySqlBuilder extends BaseSqlBuilder
 {
-    /**
-     * 判断指定数组是否为关联数组
-     *
-     * @param $arr array 欲判断的数组
-     * @return bool
-     */
-    protected function is_assoc($arr)
+    public function _date($timestamp = "time()")
     {
-        return array_keys($arr) !== range(0, count($arr) - 1);
+        return date("Y-m-d H:i:s", $timestamp);
     }
-
 
     protected function get_columns_str($columns, $placeholder = false)
     {
@@ -71,12 +66,15 @@ class MySqlBuilder extends BaseSqlBuilder
      */
     function insert($data)
     {
-        // TODO 命名参数支持
-        $placeholder_arr = array_fill(0, count($data), "?");
-
-        if ($this->is_assoc($data)) {
+        // 判断输入参数是否为关联数组，如果是，则SQL语句将采用命名参数，否则使用问号占位符
+        // NOTE: PDO 的预处理语句要么使用问号占位符，要么使用命名参数，不允许混合使用
+        if (Util::array_is_assoc($data)) {
+            $placeholder_arr = array_map(function ($item) {
+                return ":" . $item; // 命名参数是在原参数名基础上加上 ":" 构成的
+            }, array_keys($data));
             $cols = array_keys($data);
         } else {
+            $placeholder_arr = array_fill(0, count($data), "?");
             // 对于数字数组，列名数组置为空
             $cols = null;
         }
@@ -100,17 +98,11 @@ class MySqlBuilder extends BaseSqlBuilder
     /**
      * 更新指定数据
      *
-     * @param array $data 欲更新的数据数组
+     * @param array $data 欲更新的数据数组，使用关联数组，键表示欲更新的字段名
      */
     function update($data)
     {
-        // TODO 命名参数支持
-        if ($this->is_assoc($data)) {
-            $cols = array_keys($data);
-        } else {
-            // TODO 支持数字数组作为参数
-            throw new \InvalidArgumentException("Numeric arrays are not supported for the time being!");
-        }
+        $cols = array_keys($data);
 
         $this->values += $data;
 

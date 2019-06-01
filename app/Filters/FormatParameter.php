@@ -71,7 +71,7 @@ class FormatParameter
         return $this->value;
     }
 
-    public function append_validator(DataValidator $validator)
+    public function append_validator($validator)
     {
         $this->validators[] = $validator;
 

@@ -30,6 +30,9 @@ class DBConfig
     function get_pdo()
     {
         $dsn = $this->get_dsn();
-        return new \PDO($dsn, $this->db_user, $this->db_pass, array(\PDO::ERRMODE_EXCEPTION, \PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8mb4"));
+        $pdo = new \PDO($dsn, $this->db_user, $this->db_pass, array(\PDO::ERRMODE_EXCEPTION, \PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8mb4"));
+        $pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false); // 防止读取时数值类型发生转换
+        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+        return $pdo;
     }
 }

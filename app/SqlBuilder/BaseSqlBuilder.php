@@ -15,6 +15,8 @@ abstract class BaseSqlBuilder
         $this->table_name = $table_name;
     }
 
+    public abstract function _date($timestamp = "time()");
+
     function select($columns = null)
     {
         return $this;

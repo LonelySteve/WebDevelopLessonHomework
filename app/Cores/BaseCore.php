@@ -1,13 +1,14 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+
+namespace App\Cores;
 
 use App\Http\Request;
-use app\models\BaseModel;
 use App\Exceptions\BaseException;
 use App\Config\Config;
+use Throwable;
 
-abstract class Core
+abstract class BaseCore
 {
     // 定义过滤器数组
     public $FILTERS = [];
@@ -61,7 +62,7 @@ abstract class Core
             if (@$this->config->debug_mode ?: false) {
                 throw $ex;
             }
-            echo "出现自定义异常！！" . $th->get_msg();
+            echo "出现自定义异常！！" . $ex->get_msg();
         } catch (Throwable $th) {
             // 如果是Debug模式，则直接抛出该异常
             if (@$this->config->debug_mode ?: false) {

@@ -15,6 +15,13 @@ class NumberDataValidator extends DataValidator
         });
     }
 
+    function is_integer()
+    {
+        return $this->append_callback(function ($data) {
+            return is_int($data);
+        });
+    }
+
     function min($min_value)
     {
         return $this->append_callback(function ($data) use ($min_value) {

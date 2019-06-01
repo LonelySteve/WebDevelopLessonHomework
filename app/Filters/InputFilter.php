@@ -32,7 +32,7 @@ class InputFilter extends BaseFilter
         foreach ($this->format_params as $p) {
             $name = $p->get_name();
             // 添加隐藏域的值
-            if($p->is_hidden()){
+            if ($p->is_hidden()) {
                 $request->set_input($p->get_name(), $p->get_value());
                 continue;
             }

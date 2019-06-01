@@ -7,6 +7,7 @@ use App\Config\DBConfig;
 use App\SqlBuilder;
 use App\SqlBuilder\SqlBuilderFactory;
 use App\exceptions\SqlExecuteException;
+use App\Util\Util;
 
 abstract class BaseDao
 {
@@ -54,38 +55,51 @@ abstract class BaseDao
      *
      * @return SqlBuilder\BaseSqlBuilder
      */
-    protected function get_sql_builder_instance()
+    function get_sql_builder_instance()
     {
         return new $this->sql_builder_cls(self::get_table_name());
+    }
+
+    function get_pdo_instance()
+    {
+        return $this->pdo;
     }
 
     protected function execute_sql($sql, $data, $pdo_value_types)
     {
         $stat = $this->pdo->prepare($sql);
         if ($stat) {
-            foreach ($data as $key => $value) {
-                // 为毛问号占位符从 1 开始计数啊！！！
-                if (is_int($key)) {
-                    $stat->bindValue($key + 1, $value, next($pdo_value_types));
-                } else {
+            if (Util::array_is_assoc($data)) {
+                foreach ($data as $key => $value) {
                     $stat->bindValue($key, $value, $pdo_value_types[$key]);
                 }
+            } else {
+                for ($i = 0; $i < count($data); $i++) {
+                    // NOTE: 问号占位符从 1 开始计数
+                    $stat->bindValue($i + 1, $data[$i], $pdo_value_types[$i]);
+                }
             }
-            // TODO 也许可以不需要这个reset
-            reset($pdo_value_types);
             // 执行SQL
             $stat->execute();
         }
         // 判断SQL是否执行成功，未成功则抛出异常
         $info = $stat->errorInfo();
-        if ($info !== "00000") {
+        if ($info[0] !== "00000") {
             throw new SqlExecuteException($info[2]);
         }
-
         return $stat;
     }
 
-    public function query($offset, $size = 20)
+    public function insert($data)
+    {
+        $sql_builder = $this->get_sql_builder_instance();
+
+        $sql = $sql_builder->insert($data)->dump();
+
+        return $this->execute_sql($sql, $sql_builder->get_values(), self::get_field_value_types());
+    }
+
+    public function query($offset, $size = null)
     {
         $sql_builder = $this->get_sql_builder_instance();
 

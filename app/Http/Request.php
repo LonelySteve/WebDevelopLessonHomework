@@ -3,6 +3,7 @@
 
 namespace App\Http;
 
+use App\Dao\AdminDao;
 
 class Request
 {
@@ -12,16 +13,19 @@ class Request
     public $path;
     public $form;
     public $args;
+    public $aid;
 
     public static function wrap()
     {
         $r = new Request();
+        session_start();
         $r->args = $_GET;
         $r->form = $_POST;
         $r->method = $_SERVER["REQUEST_METHOD"];
         $r->path = $_SERVER["PHP_SELF"];
         $r->header = getallheaders();
         $r->cookie = $_COOKIE;
+        $r->aid = $_SESSION[AdminDao::get_primary_key_name()];
         return $r;
     }
 

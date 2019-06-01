@@ -7,23 +7,57 @@ use App\Entity\Post;
 
 class PostController extends BaseController
 {
-    public function append($title, $content, $name, $email, $homepage, $state = 0)
+    function append($title, $content, $name, $email, $homepage, $state = 0)
     {
-        (new PostDao($this->db_config))->append($title, $content, $name, $email, $homepage, $state);
+        $dao = new PostDao($this->db_config);
+
+        $pdo = $dao->get_pdo_instance();
+        $sql_builder = $dao->get_sql_builder_instance();
+
+        $dao->insert([
+            "pid" => null,
+            "name" => $name,
+            "email" => $email,
+            "title" => $title,
+            "content" => $content,
+            "homepage" => $homepage,
+            "create_time" => $sql_builder->_date(),
+            "replay" => null,
+            "replay_aid" => null,
+            "replay_create_time" => null,
+            "state" => $state,
+        ]);
+
+        return $pdo->lastInsertId();
     }
 
-    public function del($pid)
+    function delete($pid)
     {
-
+        return (new PostDao($this->db_config))->delete($pid)->rowCount();
     }
 
-    public function update($pid, $update_data_array)
+    function index($page, $size = null)
     {
+        $results = [];
+        $stat = (new PostDao($this->db_config))->query($page - 1, $size);
 
+        while ($result = $stat->fetchObject(Post::class)) {
+            $results[] = $result;
+        }
+
+        return $results;
     }
 
-    function index($page, $size)
+    function reply($pid, $aid, $content)
     {
-        return (new PostDao($this->db_config))->index($page, $size);
+        $dao = new PostDao($this->db_config);
+
+        $sql_builder = $dao->get_sql_builder_instance();
+
+        return $dao->update($pid, [
+            "replay" => $content,
+            "replay_aid" => $aid,
+            "replay_create_time" => $sql_builder->_date()
+        ])->rowCount();
     }
 }
