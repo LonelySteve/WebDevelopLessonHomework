@@ -43,7 +43,7 @@ class DataValidator
                 // 理论上这里的代码不应该被执行到，回调函数理想情况下只返回布尔值
                 $conf = Config::load();
                 if ($conf->debug_mode) {
-                    throw  $_;
+                    throw $_;
                 }
             }
             if ($mode == VERIFY_UNTIL_FAIL && !$result) {

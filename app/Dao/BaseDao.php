@@ -57,7 +57,7 @@ abstract class BaseDao
      */
     function get_sql_builder_instance()
     {
-        return new $this->sql_builder_cls(self::get_table_name());
+        return new $this->sql_builder_cls($this);
     }
 
     function get_pdo_instance()
@@ -65,25 +65,48 @@ abstract class BaseDao
         return $this->pdo;
     }
 
-    protected function execute_sql($sql, $data, $pdo_value_types)
+    /**
+     * 执行指定 SQL 语句
+     *
+     * @param $sql string 欲执行的SQL语句
+     * @param $data array SQL语句占位符对应值的数组，可使用关联数组的键名指明占位符名称（无需带":"号）
+     * @param $extra_pdo_value_types array|null 额外补充的pdo数据类型字典
+     * @param bool $auto_pdo_value_types 根据当前的dao填充pdo数据字典，即使SQL语句使用的是问号占位符，
+     * 开启此项也将生效，其效果是将先按照当前dao提供的数据类型字典填充问号占位符，再使用额外补充的pdo数据字典填充剩余问号占位符
+     * @return bool|\PDOStatement
+     * @throws SqlExecuteException
+     */
+    function execute_sql($sql, $data, $extra_pdo_value_types = null, $auto_pdo_value_types = true)
     {
-        $stat = $this->pdo->prepare($sql);
+        $pdo = $this->pdo;
+
+        $pdo_value_types = [];
+        if ($auto_pdo_value_types) {
+            $pdo_value_types = self::get_field_value_types();
+        }
+        $pdo_value_types += $extra_pdo_value_types ?: [];
+
+        $stat = $pdo->prepare($sql);
+
         if ($stat) {
             if (Util::array_is_assoc($data)) {
                 foreach ($data as $key => $value) {
-                    $stat->bindValue($key, $value, $pdo_value_types[$key]);
+                    // NOTE: 命名占位符以 ":" 开头
+                    $stat->bindValue(":" . $key, $value, $pdo_value_types[$key]);
                 }
             } else {
+                reset($pdo_value_types);
                 for ($i = 0; $i < count($data); $i++) {
                     // NOTE: 问号占位符从 1 开始计数
-                    $stat->bindValue($i + 1, $data[$i], $pdo_value_types[$i]);
+                    $stat->bindValue($i + 1, $data[$i], current($pdo_value_types));
+                    next($pdo_value_types);
                 }
             }
             // 执行SQL
             $stat->execute();
         }
         // 判断SQL是否执行成功，未成功则抛出异常
-        $info = $stat->errorInfo();
+        $info = $pdo->errorInfo();
         if ($info[0] !== "00000") {
             throw new SqlExecuteException($info[2]);
         }
@@ -92,47 +115,33 @@ abstract class BaseDao
 
     public function insert($data)
     {
-        $sql_builder = $this->get_sql_builder_instance();
-
-        $sql = $sql_builder->insert($data)->dump();
-
-        return $this->execute_sql($sql, $sql_builder->get_values(), self::get_field_value_types());
+        return ($this->get_sql_builder_instance())
+            ->insert($data)
+            ->execute();
     }
 
     public function query($offset, $size = null)
     {
-        $sql_builder = $this->get_sql_builder_instance();
-
-        $sql = $sql_builder->select()->order_by([self::get_primary_key_name() => "DESC"])->limit($offset, $size)->dump();
-
-        return $this->execute_sql($sql, $sql_builder->get_values(), [\PDO::PARAM_INT, \PDO::PARAM_INT]);
+        return ($this->get_sql_builder_instance())
+            ->select()
+            ->order_by([self::get_primary_key_name() => "DESC"])
+            ->limit($offset, $size)
+            ->execute([\PDO::PARAM_INT, \PDO::PARAM_INT]);
     }
 
     public function delete($id)
     {
-        $sql_builder = $this->get_sql_builder_instance();
-
-        $sql = $sql_builder->delete()->where([self::get_primary_key_name(), $id]);
-
-        return $this->execute_sql($sql, $sql_builder->get_values(), [\PDO::PARAM_INT]);
+        return ($this->get_sql_builder_instance())
+            ->delete()
+            ->where([self::get_primary_key_name(), $id])
+            ->execute([\PDO::PARAM_INT]);
     }
 
     public function update($id, $data)
     {
-        $sql_builder = $this->get_sql_builder_instance();
-
-        $sql = $sql_builder->update($data)->where([self::get_primary_key_name(), $id])->dump();
-
-        return $this->execute_sql($sql, $sql_builder->get_values(), self::get_field_value_types($data));
-    }
-
-    public function exist($id)
-    {
-        $sql_builder = $this->get_sql_builder_instance();
-
-        $sql = $sql_builder->select()->where([self::get_primary_key_name(), $id])->limit(1)->dump();
-
-        $stmt = $this->execute_sql($sql, $sql_builder->get_values(), [\PDO::PARAM_INT]);
-        return boolval($stmt->rowCount());
+        return ($this->get_sql_builder_instance())
+            ->update($data)
+            ->where([self::get_primary_key_name(), $id])
+            ->execute([\PDO::PARAM_INT]);
     }
 }

@@ -8,6 +8,7 @@ use App\Controller\PostController;
 use App\Exceptions\NotFoundException;
 use App\Filters\InputFilter;
 use App\Filters\LoginFilter;
+use App\Http\Response;
 use App\Validators\NumberDataValidator;
 use App\Validators\StringDataValidator;
 
@@ -31,5 +32,6 @@ class PostReplyCore extends BaseCore
         if ($controller->reply($input["pid"], $request->aid, $input["content"]) == 0) {
             throw new NotFoundException();
         }
+        (new Response())->jsonify();
     }
 }

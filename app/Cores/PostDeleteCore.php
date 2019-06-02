@@ -8,6 +8,7 @@ use App\Controller\PostController;
 use App\Exceptions\NotFoundException;
 use App\Filters\InputFilter;
 use App\Filters\LoginFilter;
+use App\Http\Response;
 use App\Validators\NumberDataValidator;
 
 class PostDeleteCore extends BaseCore
@@ -29,5 +30,7 @@ class PostDeleteCore extends BaseCore
         if ($controller->delete($input["pid"]) == 0) {
             throw new NotFoundException();
         }
+
+        (new Response())->jsonify();
     }
 }

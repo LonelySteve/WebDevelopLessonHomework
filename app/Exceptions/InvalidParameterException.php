@@ -4,8 +4,6 @@
 namespace App\Exceptions;
 
 
-use Throwable;
-
 class InvalidParameterException extends ParameterException
 {
     protected $default_code = -512;

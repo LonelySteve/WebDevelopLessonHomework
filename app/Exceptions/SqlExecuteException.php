@@ -8,8 +8,8 @@ use Throwable;
 
 class SqlExecuteException extends BaseException
 {
-    protected $code = -100;
-    protected $message = "SQL execution error";
+    protected $default_code = -100;
+    protected $message_prefix = "SQL execution error";
 
     public function __construct($message = "", $code = -1, Throwable $previous = null)
     {

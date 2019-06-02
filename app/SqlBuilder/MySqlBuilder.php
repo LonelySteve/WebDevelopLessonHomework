@@ -6,8 +6,9 @@ use App\Util\Util;
 
 class MySqlBuilder extends BaseSqlBuilder
 {
-    public function _date($timestamp = "time()")
+    public function _date($timestamp = null)
     {
+        $timestamp = $timestamp ?: time();
         return date("Y-m-d H:i:s", $timestamp);
     }
 
@@ -22,9 +23,15 @@ class MySqlBuilder extends BaseSqlBuilder
             return $columns;
         }
         if ($placeholder) {
-            $columns = array_map(function ($col) {
-                $col .= "=?";
-            }, $columns);
+            if ($this->use_name_placeholders) {
+                $columns = array_map(function ($col) {
+                    return $col .= "=:$col";
+                }, $columns);
+            } else {
+                $columns = array_map(function ($col) {
+                    return $col .= "=?";
+                }, $columns);
+            }
         }
         return implode(", ", $columns);
     }
@@ -73,10 +80,12 @@ class MySqlBuilder extends BaseSqlBuilder
                 return ":" . $item; // 命名参数是在原参数名基础上加上 ":" 构成的
             }, array_keys($data));
             $cols = array_keys($data);
+            $this->use_name_placeholders = true;
         } else {
             $placeholder_arr = array_fill(0, count($data), "?");
             // 对于数字数组，列名数组置为空
             $cols = null;
+            $this->use_name_placeholders = false;
         }
 
         $this->values += $data;
@@ -98,15 +107,18 @@ class MySqlBuilder extends BaseSqlBuilder
     /**
      * 更新指定数据
      *
+     * 【注意：Update 函数始终使用命名参数占位符】
+     *
      * @param array $data 欲更新的数据数组，使用关联数组，键表示欲更新的字段名
      */
     function update($data)
     {
-        $cols = array_keys($data);
+        // update 函数始终使用命名参数占位符
+        $this->use_name_placeholders = true;
 
         $this->values += $data;
 
-        $columns_str = $this->get_columns_str($cols, true);
+        $columns_str = $this->get_columns_str(array_keys($data), true);
 
         $this->segments[] = "UPDATE " . $this->table_name . " SET " . $columns_str;
 
@@ -122,8 +134,17 @@ class MySqlBuilder extends BaseSqlBuilder
 
     function limit($offset, $size = null)
     {
-        $this->segments[] = "LIMIT ?" . ($size ? ",?" : "");
-        $this->values += [$offset, $size];
+        // 根据  $use_name_placeholders 标志决定使用何种占位方式
+        if ($this->use_name_placeholders) {
+            $this->segments[] = "LIMIT :__offset__" . ($size ? ", :__size__" : "");
+            $this->values += [
+                "__offset__" => $offset,
+                "__size__" => $size
+            ];
+        } else {
+            $this->segments[] = "LIMIT ?" . ($size ? ",?" : "");
+            $this->values += [$offset, $size];
+        }
 
         return $this;
     }
@@ -136,12 +157,12 @@ class MySqlBuilder extends BaseSqlBuilder
      */
     function order_by($data)
     {
-        foreach ($data as $key => $value) {
-            if (is_int($key)) {
-                $parts[] = $value;
-            } else {
+        if (Util::array_is_assoc($data)) {
+            foreach ($data as $key => $value) {
                 $parts[] = "$key $value";
             }
+        } else {
+            $parts = array_values($data);
         }
         $this->segments[] = "ORDER BY " . implode(", ", $parts);
 
@@ -157,11 +178,18 @@ class MySqlBuilder extends BaseSqlBuilder
         }
         // 判断条件数组的长度，如果为2则在中间插入=
         if (count($conditions) === 2) {
-            $conditions = $conditions[0] + ["="] + $conditions[1];
+            $conditions = [$conditions[0], "=", $conditions[1]];
         }
         // 懒得判断符号是否有效了，就直接合到SQL语句里得了
-        $this->segments[] = "WHRER " . $conditions[0] . $conditions[1] . "?";
-        $this->values[] = $conditions[2];
+        if ($this->use_name_placeholders) {
+            $placeholder = "__param" . strval($this->name_params_counter) . "__";
+
+            $this->segments[] = "WHERE " . $conditions[0] . $conditions[1] . ":" . $placeholder;
+            $this->values[$placeholder] = $conditions[2];
+        } else {
+            $this->segments[] = "WHERE " . $conditions[0] . $conditions[1] . "?";
+            $this->values[] = $conditions[2];
+        }
 
         return $this;
     }

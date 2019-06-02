@@ -4,8 +4,6 @@
 namespace App\Exceptions;
 
 
-use Throwable;
-
 class MissingParameterException extends ParameterException
 {
     protected $default_code = -511;

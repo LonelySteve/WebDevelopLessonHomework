@@ -9,8 +9,8 @@ use Throwable;
 class ParameterException extends BaseException
 {
     protected $name;
-    protected $code = -510;
-    protected $message = "parameter error";
+    protected $default_code = -510;
+    protected $message_prefix = "parameter error";
 
     /**
      * MissingParameterException constructor.

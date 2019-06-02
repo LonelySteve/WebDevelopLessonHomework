@@ -34,6 +34,6 @@ class BaseException extends \Exception
 
     protected function join_message($message_content = "")
     {
-        return $this->message_prefix . $message_content ?: ": " . strval($message_content) . "!";
+        return $this->message_prefix . ($message_content ? ": " . strval($message_content) : "") . "!";
     }
 }

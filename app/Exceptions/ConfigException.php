@@ -4,8 +4,6 @@
 namespace App\Exceptions;
 
 
-use Throwable;
-
 /**
  * ConfigException
  * 属于非用户操作导致的异常

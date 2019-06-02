@@ -54,10 +54,12 @@ class PostController extends BaseController
 
         $sql_builder = $dao->get_sql_builder_instance();
 
-        return $dao->update($pid, [
+        return $sql_builder->update([
             "replay" => $content,
             "replay_aid" => $aid,
             "replay_create_time" => $sql_builder->_date()
-        ])->rowCount();
+        ])
+            ->where([$dao::get_primary_key_name(), $pid])
+            ->execute(["__param0__" => \PDO::PARAM_INT])->rowCount();
     }
 }

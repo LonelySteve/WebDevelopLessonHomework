@@ -25,7 +25,7 @@ class Request
         $r->path = $_SERVER["PHP_SELF"];
         $r->header = getallheaders();
         $r->cookie = $_COOKIE;
-        $r->aid = $_SESSION[AdminDao::get_primary_key_name()];
+        $r->aid = @$_SESSION[AdminDao::get_primary_key_name()];
         return $r;
     }
 

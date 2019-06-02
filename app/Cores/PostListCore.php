@@ -15,8 +15,8 @@ class PostListCore extends BaseCore
     {
         $this->FILTERS += [
             (new InputFilter())
-                ->default("p", (new NumberDataValidator())->is_integer()->min(1), 1)
-                ->default("size", (new NumberDataValidator())->is_integer()->min(10), 10)
+                ->default("page", (new NumberDataValidator())->is_integer()->min(1), 1)
+                ->default("size", (new NumberDataValidator())->is_integer()->min(10)->max(50), 10)
         ];
     }
 
@@ -26,7 +26,7 @@ class PostListCore extends BaseCore
 
         $input = $request->get_input();
 
-        $data = $controller->index($input["p"], $input["size"]);
+        $data = $controller->index($input["page"], $input["size"]);
         $r = new Response();
         $r->jsonify($data);
     }
