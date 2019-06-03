@@ -12,7 +12,7 @@ class LoginFilter extends BaseFilter
 {
     function pass(Request $request)
     {
-        if ($request->aid == null) {
+        if ($request->admin_name == null) {
             throw new NotLoginException();
         }
         return true;

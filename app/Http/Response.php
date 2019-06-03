@@ -6,18 +6,30 @@ namespace App\Http;
 
 class Response
 {
-    static $smarty;
+    // 配置对象
+    static $config;
 
     public $header;
     public $cookie;
-    public $content;
 
-    public function render($file, $kwargs)
+    public $data;
+
+    public function __construct($data = null)
     {
-        foreach ($kwargs as $k => $v) {
-            self::$smarty->assign($k, $v);
+        $this->data = $data;
+    }
+
+    public function render($file, $kwargs = null, $include_data = true)
+    {
+        $kwargs = $kwargs ?: [];
+        $kwargs += ["__debug__" => self::$config->debug_mode];
+        if ($include_data) {
+            $kwargs += ["__data__" => $this->data];
         }
-        self::$smarty->display($file);
+        foreach ($kwargs as $k => $v) {
+            self::$config->smarty->assign($k, $v);
+        }
+        self::$config->smarty->display($file);
     }
 
     public function error_jsonify($code = -1, $msg = "unknown error!")

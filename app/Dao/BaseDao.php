@@ -104,13 +104,25 @@ abstract class BaseDao
             }
             // 执行SQL
             $stat->execute();
+            // 判断SQL是否执行成功，未成功则抛出异常
+            $info = $stat->errorInfo();
+            if ($info[0] !== "00000") {
+                throw new SqlExecuteException($info[2]);
+            }
         }
-        // 判断SQL是否执行成功，未成功则抛出异常
+        // 通过PDO对象判断SQL是否合法，不合法则抛出异常
         $info = $pdo->errorInfo();
         if ($info[0] !== "00000") {
             throw new SqlExecuteException($info[2]);
         }
         return $stat;
+    }
+
+    public function count()
+    {
+        return ($this->get_sql_builder_instance())
+            ->select("COUNT(*)")
+            ->execute();
     }
 
     public function insert($data)
@@ -122,11 +134,17 @@ abstract class BaseDao
 
     public function query($offset, $size = null)
     {
+        if ($offset) {
+            $pts[] = \PDO::PARAM_INT;
+        }
+        if ($size) {
+            $pts[] = \PDO::PARAM_INT;
+        }
         return ($this->get_sql_builder_instance())
             ->select()
             ->order_by([self::get_primary_key_name() => "DESC"])
             ->limit($offset, $size)
-            ->execute([\PDO::PARAM_INT, \PDO::PARAM_INT]);
+            ->execute($pts);
     }
 
     public function delete($id)

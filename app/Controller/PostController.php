@@ -7,7 +7,7 @@ use App\Entity\Post;
 
 class PostController extends BaseController
 {
-    function append($title, $content, $name, $email, $homepage, $state = 0)
+    function append($title, $content, $name, $qq, $email, $homepage, $state = 0)
     {
         $dao = new PostDao($this->db_config);
 
@@ -17,14 +17,15 @@ class PostController extends BaseController
         $dao->insert([
             "pid" => null,
             "name" => $name,
+            "qq" => $qq,
             "email" => $email,
             "title" => $title,
             "content" => $content,
             "homepage" => $homepage,
             "create_time" => $sql_builder->_date(),
-            "replay" => null,
-            "replay_aid" => null,
-            "replay_create_time" => null,
+            "reply" => null,
+            "reply_admin_name" => null,
+            "reply_create_time" => null,
             "state" => $state,
         ]);
 
@@ -39,25 +40,46 @@ class PostController extends BaseController
     function index($page, $size = null)
     {
         $results = [];
-        $stat = (new PostDao($this->db_config))->query($page - 1, $size);
+
+        $dao = new PostDao($this->db_config);
+
+        $amount = $dao->count()->fetch(\PDO::FETCH_UNIQUE)[0];
+
+        $stat = $dao->query($page - 1, $size);
 
         while ($result = $stat->fetchObject(Post::class)) {
             $results[] = $result;
         }
 
-        return $results;
+        $page_count = ceil($amount / $size);
+
+        // 计算当前正确页码，算法如下：
+        // 当results为空的时候，即可认为当前页是最后一页，页码也就是总页数（page_count）
+        // 否则当前页码就等于page
+        if (count($results) == 0) {
+            $cur_page = $page_count;
+        } else {
+            $cur_page = $page;
+        }
+
+        return [
+            "amount" => $amount,
+            "page_count" => ceil($amount / $size),
+            "cur_page" => $cur_page,
+            "posts" => $results
+        ];
     }
 
-    function reply($pid, $aid, $content)
+    function reply($pid, $name, $content)
     {
         $dao = new PostDao($this->db_config);
 
         $sql_builder = $dao->get_sql_builder_instance();
 
         return $sql_builder->update([
-            "replay" => $content,
-            "replay_aid" => $aid,
-            "replay_create_time" => $sql_builder->_date()
+            "reply" => $content,
+            "reply_admin_name" => $name,
+            "reply_create_time" => $sql_builder->_date()
         ])
             ->where([$dao::get_primary_key_name(), $pid])
             ->execute(["__param0__" => \PDO::PARAM_INT])->rowCount();

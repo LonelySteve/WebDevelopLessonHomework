@@ -20,7 +20,7 @@ class AuthController extends BaseController
 
         if ($result) {
             if (md5($password) === $result["password"]) {
-                $_SESSION[$dao::get_primary_key_name()] = $result["aid"];
+                $_SESSION["admin_name"] = $result["username"];
             } else {
                 throw new PasswordException();
             }
@@ -33,7 +33,7 @@ class AuthController extends BaseController
 
     public function logout()
     {
-        unset($_SESSION[AdminDao::get_primary_key_name()]);
+        unset($_SESSION["admin_name"]);
 
         return true;
     }

@@ -8,15 +8,15 @@ use App\Controller\PostController;
 use App\Exceptions\NotFoundException;
 use App\Filters\InputFilter;
 use App\Filters\LoginFilter;
-use App\Http\Response;
 use App\Validators\NumberDataValidator;
 use App\Validators\StringDataValidator;
 
-class PostReplyCore extends BaseCore
+class PostReplyCore extends Core
 {
     public function __construct()
     {
-        $this->FILTERS += [
+        parent::__construct();
+        $this->filters += [
             (new LoginFilter()),
             (new InputFilter())
                 ->require("pid", (new NumberDataValidator())->is_integer()->min(1))
@@ -29,9 +29,10 @@ class PostReplyCore extends BaseCore
         $controller = new PostController($this->config->db_config);
         $input = $request->get_input();
 
-        if ($controller->reply($input["pid"], $request->aid, $input["content"]) == 0) {
+        if ($controller->reply($input["pid"], $request->admin_name, $input["content"]) == 0) {
             throw new NotFoundException();
         }
-        (new Response())->jsonify();
+
+        return true;
     }
 }

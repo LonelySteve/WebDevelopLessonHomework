@@ -13,7 +13,7 @@ class Request
     public $path;
     public $form;
     public $args;
-    public $aid;
+    public $admin_name;
 
     public static function wrap()
     {
@@ -25,21 +25,29 @@ class Request
         $r->path = $_SERVER["PHP_SELF"];
         $r->header = getallheaders();
         $r->cookie = $_COOKIE;
-        $r->aid = @$_SESSION[AdminDao::get_primary_key_name()];
+        $r->admin_name = @$_SESSION["admin_name"];
         return $r;
     }
 
     public function get_input()
     {
-        return $this->form + $this->args;
+        // 根据不同的请求类型获取不同的输入参数
+        switch ($this->method) {
+            case "POST":
+                return $this->form;
+            default:
+                return $this->args;
+        }
     }
 
     public function set_input($name, $value)
     {
-        if (array_key_exists($name, $this->args)) {
-            $this->args[$name] = $value;
-        } else {
-            $this->form[$name] = $value;
+        // 根据不同的请求类型设置不同的输入参数
+        switch ($this->method) {
+            case "POST":
+                return $this->form[$name] = $value;
+            default:
+                return $this->args[$name] = $value;
         }
     }
 }

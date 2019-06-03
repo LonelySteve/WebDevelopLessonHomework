@@ -51,7 +51,7 @@ class MySqlBuilder extends BaseSqlBuilder
                 $columns = array();
             } else {
                 // 如果是字符串表示的列序列，以逗号（允许逗号后面有不定数量的空格）分隔得到列名数组
-                $columns = preg_split(", *", $columns);
+                $columns = preg_split("/, */", $columns, NULL, PREG_SPLIT_NO_EMPTY);
             }
         }
 

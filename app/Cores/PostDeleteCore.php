@@ -8,14 +8,14 @@ use App\Controller\PostController;
 use App\Exceptions\NotFoundException;
 use App\Filters\InputFilter;
 use App\Filters\LoginFilter;
-use App\Http\Response;
 use App\Validators\NumberDataValidator;
 
-class PostDeleteCore extends BaseCore
+class PostDeleteCore extends Core
 {
     public function __construct()
     {
-        $this->FILTERS += [
+        parent::__construct();
+        $this->filters += [
             (new LoginFilter()),
             (new InputFilter())
                 ->require("pid", (new NumberDataValidator())->is_integer()->min(1))
@@ -31,6 +31,6 @@ class PostDeleteCore extends BaseCore
             throw new NotFoundException();
         }
 
-        (new Response())->jsonify();
+        return true;
     }
 }

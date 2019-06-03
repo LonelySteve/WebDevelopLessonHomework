@@ -30,8 +30,6 @@ class Config
 
             self::$instance = new Config();
             self::$instance->debug_mode = false;
-            // 设置时区
-            date_default_timezone_set('Etc/GMT-8');
 
             try {
                 $dotenv = Dotenv::create($paths ?: __DIR__ . "\..\..");
@@ -75,7 +73,6 @@ class Config
             self::$instance->smarty->setCompileDir(__DIR__ . "/../../templates_c/");
             self::$instance->smarty->setConfigDir(__DIR__ . "/../../configs/");
             self::$instance->smarty->setCacheDir(__DIR__ . "/../../cache/");
-            Response::$smarty = self::$instance->smarty;
         }
 
         return self::$instance;

@@ -5,17 +5,21 @@ namespace App\Cores;
 
 
 use App\Filters\InputFilter;
+use App\Filters\MethodFilter;
 use App\Http\Request;
 use App\Controller\AuthController;
-use App\Http\Response;
 use App\Validators\StringDataValidator;
 
-class LoginCore extends BaseCore
+class LoginCore extends Core
 {
     public function __construct()
     {
-        $this->FILTERS += [
-            (new InputFilter())
+        parent::__construct();
+        $this->filters += [
+            new MethodFilter("POST"),
+            (new InputFilter(function (Request $r) {
+                return $r->form;
+            }))
                 ->require("username", (new StringDataValidator())->min_len(2)->max_len(50))
                 ->require("password", (new StringDataValidator())->min_len(6)->max_len(16)->match_regex("/^[\w_-]{6,16}$/"))
         ];
@@ -25,7 +29,6 @@ class LoginCore extends BaseCore
     {
         $controller = new AuthController($this->config->db_config);
         $input = $request->get_input();
-        $controller->login($input["username"], $input["password"]);
-        (new Response())->jsonify();
+        return $controller->login($input["username"], $input["password"]);
     }
 }
