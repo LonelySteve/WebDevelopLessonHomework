@@ -12,7 +12,6 @@ class PostListCore extends Core
 {
     function __construct()
     {
-        parent::__construct();
         $this->filters += [
             (new InputFilter())
                 ->default("page", (new NumberDataValidator())->is_integer()->min(1), 1)

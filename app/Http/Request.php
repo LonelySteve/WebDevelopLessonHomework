@@ -15,12 +15,22 @@ class Request
     public $args;
     public $admin_name;
 
+    private static function nullal(array &$arr)
+    {
+        foreach ($arr as $k => &$v) {
+            if ($v === "") {
+                $v = null;
+            }
+        }
+        return $arr;
+    }
+
     public static function wrap()
     {
         $r = new Request();
         session_start();
-        $r->args = $_GET;
-        $r->form = $_POST;
+        $r->args = self::nullal($_GET);
+        $r->form = self::nullal($_POST);
         $r->method = $_SERVER["REQUEST_METHOD"];
         $r->path = $_SERVER["PHP_SELF"];
         $r->header = getallheaders();

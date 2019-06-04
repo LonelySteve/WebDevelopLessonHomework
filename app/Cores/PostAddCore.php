@@ -13,7 +13,6 @@ class PostAddCore extends Core
 {
     public function __construct()
     {
-        parent::__construct();
         $this->filters += [
             (new InputFilter())
                 ->require("name", (new StringDataValidator())->min_len(2)->max_len(50))

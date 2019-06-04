@@ -1,0 +1,257 @@
+@base-color: #6F42C1;
+
+.base-border() {
+    border: lighten(@base-color, 10%) solid 1px;
+}
+
+.base-background(light, @ptr: 25%) {
+    background: lighten(@base-color, @ptr);
+}
+
+.base-background(dark, @ptr: 25%) {
+    background: darken(@base-color, @ptr);
+}
+
+.base-background() {
+    background: @base-color;
+}
+
+.text-color {
+    color: darken(@base-color, 10%);
+}
+
+.navbar {
+    background-color: lighten(@base-color, 10%);
+
+    .navbar-header {
+        .navbar-brand {
+            color: #fff;
+        }
+
+        .navbar-toggle {
+            .icon-bar {
+                background-color: #ddd;
+            }
+        }
+
+        .navbar-toggle:focus,
+        .navbar-toggle:hover {
+            background-color: transparent;
+        }
+    }
+
+    #menu {
+        background-color: lighten(@base-color, 10%);
+        position: absolute;
+        width: 100%;
+        z-index: 1500;
+
+        a {
+            color: #fff;
+        }
+
+        .dropdown>a {
+            background-color: transparent;
+        }
+
+        a:hover {
+            color: darken(#fff, 10%);
+            background-color: lighten(@base-color, 15%);
+        }
+
+        .active a {
+            background-color: lighten(@base-color, 5%);
+        }
+    }
+
+    .nav {
+        .dropdown {
+            .dropdown-menu {
+                background-color: lighten(@base-color, 10%);
+            }
+        }
+    }
+}
+
+
+.main-panel {
+    .base-border;
+
+    .necessary-item::after {
+        content: "*";
+        color: red;
+    }
+
+    .edit-box {
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        outline: none;
+        color: black;
+        border-bottom: 1.5px solid lighten(@base-color, 10%);
+        line-height: 20px;
+        font-size: 20px;
+        background-color: transparent;
+        margin: 8px 0px;
+    }
+
+    .btn-primary {
+        background-color: transparent;
+        border-color: lighten(@base-color, 15%);
+        color: lighten(@base-color, 15%);
+    }
+
+    .btn-primary:hover {
+        background-color: fadeout(@base-color, 50%);
+        color: white;
+    }
+
+    /*解决placeholder的样式问题*/
+    .edit-box::-webkit-input-placeholder {
+        color: lighten(@base-color, 15%);
+        opacity: 0.5;
+        font-size: 18px;
+    }
+
+    &>.panel-heading,
+    &>.panel-footer {
+        border: none;
+        .base-background(light);
+    }
+
+
+
+    &>.panel-body {
+        overflow-y: auto;
+
+        *::-webkit-scrollbar,
+        &::-webkit-scrollbar {
+            /*滚动条整体样式*/
+            width: 3.5px;
+        }
+
+        *::-webkit-scrollbar-thumb,
+        &::-webkit-scrollbar-thumb {
+            /*滚动条里面小方块*/
+            .base-background(light);
+            border-radius: 1.5px;
+
+            &:hover {
+                .base-background(light, 15%);
+            }
+        }
+
+        .card {
+            position: relative;
+            word-break: break-all;
+            .base-border;
+
+            a {
+                cursor: pointer;
+                color: @base-color  !important;
+                text-decoration: none !important;
+
+                &:link,
+                &:visited,
+                &:hover,
+                &:active {
+                    text-decoration: none !important;
+                }
+
+                &:visited {
+                    color: @base-color  !important;
+                }
+
+                &:hover {
+                    color: lighten(@base-color, 10%) !important;
+                    text-decoration: none !important;
+                }
+            }
+
+            .panel-body {
+                .face {
+                    margin-bottom: 10px;
+                }
+
+                .brief {
+                    margin-top: 5px;
+                }
+            }
+
+            .panel-body>.menu-group {
+                position: absolute;
+                right: 10px;
+                top: 10px;
+
+                .btn:active {
+                    box-shadow: none;
+                    -webkit-box-shadow: none;
+                }
+            }
+
+            .panel-body>.menu-group>.dropdown-menu {
+                top: 35px;
+                left: -100px;
+                border: 1px solid @base-color;
+                box-shadow: 0 1px 5px @base-color;
+
+                a:hover {
+                    color: white !important;
+                    background-color: lighten(@base-color, 10%);
+                }
+
+                .divider {
+                    background-color: lighten(@base-color, 10%);
+                }
+            }
+        }
+    }
+
+    &>.panel-footer {
+        .pagination {
+            float: left;
+            margin: 0 0;
+
+            &>li>a {
+                .base-background(light);
+                .base-border;
+                .text-color;
+            }
+        }
+
+        .page-jump {
+            float: right;
+
+            input[type="text"] {
+                display: inline-block;
+                width: 50px;
+                height: 34px;
+                text-align: center;
+                padding: 0 10px;
+                background: transparent;
+                .text-color;
+                .base-border;
+                border-radius: 4px;
+
+                &:focus {
+                    box-shadow: none;
+                }
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .pagination {
+                position: relative;
+                left: 50%;
+                clear: both;
+                float: none;
+                transform: translate(-50%, 0);
+            }
+
+            .page-jump {
+                display: none;
+            }
+        }
+    }
+
+}

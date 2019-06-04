@@ -2,19 +2,7 @@
 {include file="head.tpl"}
 <body>
 <div class="container">
-    <nav class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">留言板</a>
-            </div>
-            <div>
-                <ul class="nav navbar-nav">
-                    <li><a href="#">我要留言</a></li>
-                    <li><a href="#">登录</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {include file="nav.tpl"}
     <div class="panel main-panel">
         <div class="panel-body">
             {foreach $__data__.posts as $data}
@@ -86,7 +74,7 @@
                                         </small>
                                     </div>
                                 </div>
-                                <!-- 被截断的主体内容 -->
+                                <!-- 主体内容 -->
                                 <div class="row">
                                     <div class="col-xs-12 text-justify text-left">
                                         <p class="brief">
@@ -112,17 +100,17 @@
                                 </div>
                             {/if}
                         </div>
-                        <div class="btn-group menu-group">
-                            <a role="btn" class="btn" data-toggle="dropdown">
-                                <i class="iconfont icon-more"></i>
-                            </a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href="#">回复</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">删除</a></li>
-                                <li><a href="#">置顶</a></li>
-                            </ul>
-                        </div>
+                        {if isset($admin_name) && $admin_name}
+                            <div class="btn-group menu-group">
+                                <a role="btn" class="btn" data-toggle="dropdown">
+                                    <i class="iconfont icon-more"></i>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a onclick="reply_post({$data->pid})">回复</a></li>
+                                    <li><a onclick="delete_post({$data->pid})">删除</a></li>
+                                </ul>
+                            </div>
+                        {/if}
                     </div>
                 </div>
             {/foreach}
@@ -138,6 +126,7 @@
                                 <li><a href="/?page={$i}">{$i}</a></li>
                             {/for}
                         {else}
+                            {* 第二种情况 ： 页数大于 5个 *}
                             <li><a href="/?page=1">1</a></li>
                             {if $__data__.cur_page-1>2}
                                 <li><a href="#" class="disabled">...</a></li>
@@ -173,17 +162,42 @@
         </div>
     </div>
 </div>
-<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
-<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
 <script>
-    var resize_callback = function () {
-        $(".main-panel > .panel-body").css("height", $(window).height() - 200);
-    };
+    function delete_post(pid) {
+        $.get("api/post/delete.php?pid=" + pid, function (data) {
+            if (data.code === 0) {
+                window.location.href = "info.php?message=删除成功！&time=1";
+            } else {
+                window.location.href = "info.php?message='删除失败！" + data.message;
+            }
+        });
+    }
+
+    function reply_post(pid) {
+        input = prompt("请输入对pid:" + pid + "的回复，注意：这将覆盖原有的回复！");
+        $.post("api/post/update_reply.php",
+            {
+                "pid": pid,
+                "content": input
+            },
+            function (data) {
+                if (data.code === 0) {
+                    window.location.href = "info.php?message=回复成功！&time=1";
+                } else {
+                    window.location.href = "info.php?message='回复失败！" + data.message;
+                }
+            });
+    }
+
     $(document).ready(function () {
-        resize_callback();
-        $(window).resize(resize_callback);
+        $("#text-target-page").keyup(function (event) {
+            if (event.which === 13) {
+                if (this.value >= 1)
+                    window.open("/?page=" + this.value, "_self");
+                else
+                    window.open("/?page=" + 1, "_self");
+            }
+        })
     });
 </script>
 </body>

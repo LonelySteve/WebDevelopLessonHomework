@@ -25,19 +25,12 @@ class Core
     public $config;
     // 允许的请求方法数组
     protected $allowed_methods = [];
+    // 子流程函数数组
+    protected $sub_process_callbacks = [];
     // 响应回调函数
     protected $response_callback;
     protected $error_response_callback;
 
-    function __construct()
-    {
-        $this->response_callback = function (Response $response) {
-            echo "未定义响应内容!";
-        };
-        $this->error_response_callback = function (Response $response, \Throwable $th) {
-            $response->render("error.tpl", ["__throw__" => $th]);
-        };
-    }
 
     function init()
     {
@@ -86,8 +79,18 @@ class Core
         if ($this->apply_filters($r)) {
             // 主业务逻辑
             $data = $this->main($r);
+            foreach ($this->sub_process_callbacks as $sub_process) {
+                $sub_process($r, $data);
+            }
             ($this->response_callback)(new Response($data));
         }
+    }
+
+    function append_sub_process(callable $sub_process_callback)
+    {
+        $this->sub_process_callbacks[] = $sub_process_callback;
+
+        return $this;
     }
 
     function method($names, callable $response_callback)
@@ -110,7 +113,7 @@ class Core
         });
 
         $this->error_response_callback = function (Response $response, \Throwable $th) {
-            $response->render("error.tpl", ["__throw__" => $th]);
+            $response->error_jsonify($th->getCode(), $th->getMessage());
         };
 
         return $this;
@@ -118,12 +121,16 @@ class Core
 
     function as_web_page($template_name, $extra_params = null)
     {
+        $extra_params = $extra_params ?: [];
         $this->method("GET", function (Response $response) use ($template_name, $extra_params) {
+            if (is_array($response->data)) {
+                $extra_params += $response->data;
+            }
             $response->render($template_name, $extra_params);
         });
 
         $this->error_response_callback = function (Response $response, \Throwable $th) {
-            $response->render("error.tpl", ["__throw__" => $th]);
+            $response->render("info.tpl", ["__title__" => "留言板 - 错误", "type" => "error", "message" => $th, "go_url" => "/", "time" => 5]);
         };
 
         return $this;
@@ -135,10 +142,6 @@ class Core
         try {
             $this->handle();
         } catch (\Throwable $th) {
-            // 如果是Debug模式，则直接抛出该异常
-            if (@$this->config->debug_mode ?: false) {
-                throw $th;
-            }
             ($this->error_response_callback)(new Response(), $th);
         }
     }

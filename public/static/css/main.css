@@ -1,8 +1,74 @@
 .text-color {
   color: #59339d;
 }
+.navbar {
+  background-color: #8c68ce;
+}
+.navbar .navbar-header .navbar-brand {
+  color: #fff;
+}
+.navbar .navbar-header .navbar-toggle .icon-bar {
+  background-color: #ddd;
+}
+.navbar .navbar-header .navbar-toggle:focus,
+.navbar .navbar-header .navbar-toggle:hover {
+  background-color: transparent;
+}
+.navbar #menu {
+  background-color: #8c68ce;
+  position: absolute;
+  width: 100%;
+  z-index: 1500;
+}
+.navbar #menu a {
+  color: #fff;
+}
+.navbar #menu .dropdown > a {
+  background-color: transparent;
+}
+.navbar #menu a:hover {
+  color: #e6e6e6;
+  background-color: #9b7cd4;
+}
+.navbar #menu .active a {
+  background-color: #7e55c7;
+}
+.navbar .nav .dropdown .dropdown-menu {
+  background-color: #8c68ce;
+}
 .main-panel {
   border: #8c68ce solid 1px;
+  /*解决placeholder的样式问题*/
+}
+.main-panel .necessary-item::after {
+  content: "*";
+  color: red;
+}
+.main-panel .edit-box {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  outline: none;
+  color: black;
+  border-bottom: 1.5px solid #8c68ce;
+  line-height: 20px;
+  font-size: 20px;
+  background-color: transparent;
+  margin: 8px 0px;
+}
+.main-panel .btn-primary {
+  background-color: transparent;
+  border-color: #9b7cd4;
+  color: #9b7cd4;
+}
+.main-panel .btn-primary:hover {
+  background-color: rgba(111, 66, 193, 0.5);
+  color: white;
+}
+.main-panel .edit-box::-webkit-input-placeholder {
+  color: #9b7cd4;
+  opacity: 0.5;
+  font-size: 18px;
 }
 .main-panel > .panel-heading,
 .main-panel > .panel-footer {
@@ -12,15 +78,18 @@
 .main-panel > .panel-body {
   overflow-y: auto;
 }
+.main-panel > .panel-body *::-webkit-scrollbar,
 .main-panel > .panel-body::-webkit-scrollbar {
   /*滚动条整体样式*/
   width: 3.5px;
 }
+.main-panel > .panel-body *::-webkit-scrollbar-thumb,
 .main-panel > .panel-body::-webkit-scrollbar-thumb {
   /*滚动条里面小方块*/
   background: #b8a2e0;
   border-radius: 1.5px;
 }
+.main-panel > .panel-body *::-webkit-scrollbar-thumb:hover,
 .main-panel > .panel-body::-webkit-scrollbar-thumb:hover {
   background: #9b7cd4;
 }

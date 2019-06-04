@@ -53,10 +53,7 @@ class PostController extends BaseController
 
         $page_count = ceil($amount / $size);
 
-        // 计算当前正确页码，算法如下：
-        // 当results为空的时候，即可认为当前页是最后一页，页码也就是总页数（page_count）
-        // 否则当前页码就等于page
-        if (count($results) == 0) {
+        if ($page > $page_count) {
             $cur_page = $page_count;
         } else {
             $cur_page = $page;

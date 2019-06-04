@@ -19,5 +19,26 @@
     {/if}
     <link rel="stylesheet" href="static/css/main.css">
 
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: hidden;
+        }
+
+        .container {
+            height: 75%;
+        }
+
+        .main-panel,
+        .panel-body {
+            height: 100%;
+        }
+    </style>
+
     <title>{$__title__}</title>
+
 </head>

@@ -15,7 +15,6 @@ class PostReplyCore extends Core
 {
     public function __construct()
     {
-        parent::__construct();
         $this->filters += [
             (new LoginFilter()),
             (new InputFilter())

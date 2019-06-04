@@ -14,7 +14,6 @@ class LoginCore extends Core
 {
     public function __construct()
     {
-        parent::__construct();
         $this->filters += [
             new MethodFilter("POST"),
             (new InputFilter(function (Request $r) {
