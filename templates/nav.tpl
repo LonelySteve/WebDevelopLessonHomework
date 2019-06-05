@@ -29,7 +29,3 @@
         </ul>
     </div>
 </nav>
-
-{if isset($admin_name)}
-    {include file="bootstrap.tpl"}
-{/if}
