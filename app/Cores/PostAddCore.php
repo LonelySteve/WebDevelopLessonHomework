@@ -25,7 +25,7 @@ class PostAddCore extends Core
                     (new StringDataValidator())->min_len(5)->max_len(15)->match_regex("/^\d+$/")])
                 ->default("homepage", [
                     (new DataValidator())->is_null(),
-                    (new StringDataValidator())->match_regex("/^((https|http)?:\/\/)[^\s]+/")
+                    (new StringDataValidator())->max_len(50)->match_regex("/^((https|http):\/\/)[^\s]+/")
                 ])
                 ->require("title", (new StringDataValidator())->min_len(2)->max_len(30))
                 ->require("content", (new StringDataValidator())->min_len(2)->max_len(233))
