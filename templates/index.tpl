@@ -107,6 +107,7 @@
                                 </a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li><a onclick="reply_post({$data->pid})">回复</a></li>
+                                    <li class="divider"></li>
                                     <li><a onclick="delete_post({$data->pid})">删除</a></li>
                                 </ul>
                             </div>
@@ -165,29 +166,33 @@
 {include file="bootstrap.tpl"}
 <script>
     function delete_post(pid) {
-        $.get("api/post/delete.php?pid=" + pid, function (data) {
-            if (data.code === 0) {
-                window.location.href = "info.php?message=删除成功！&time=1";
-            } else {
-                window.location.href = "info.php?message='删除失败！" + data.message;
-            }
-        });
+        if (confirm("确定删除pid:" + pid + "的留言吗？")) {
+            $.get("api/post/delete.php?pid=" + pid, function (data) {
+                if (data.code === 0) {
+                    window.location.href = "info.php?message=删除成功！&time=1";
+                } else {
+                    window.location.href = "info.php?message='删除失败！" + data.message;
+                }
+            });
+        }
     }
 
     function reply_post(pid) {
         input = prompt("请输入对pid:" + pid + "的回复，注意：这将覆盖原有的回复！");
-        $.post("api/post/update_reply.php",
-            {
-                "pid": pid,
-                "content": input
-            },
-            function (data) {
-                if (data.code === 0) {
-                    window.location.href = "info.php?message=回复成功！&time=1";
-                } else {
-                    window.location.href = "info.php?message='回复失败！" + data.message;
-                }
-            });
+        if (input) {
+            $.post("api/post/update_reply.php",
+                {
+                    "pid": pid,
+                    "content": input
+                },
+                function (data) {
+                    if (data.code === 0) {
+                        window.location.href = "info.php?message=回复成功！&time=1";
+                    } else {
+                        window.location.href = "info.php?message='回复失败！" + data.message;
+                    }
+                });
+        }
     }
 
     $(document).ready(function () {
