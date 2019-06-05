@@ -32,13 +32,16 @@ class Config
             self::$instance->debug_mode = false;
 
             try {
-                $dotenv = Dotenv::create($paths ?: __DIR__ . "\..\..");
+                $dotenv = Dotenv::create($paths ?: __DIR__ . "/../../");
 
                 $dotenv->load();
 
                 $dotenv->required("DEBUG_MODE")->isBoolean();
-                // 是否为调试模式，默认情况为False
-                $is_debug_mode = @getenv("DEBUG_MODE") ?: false;
+
+                $envs = $dotenv->getEnvironmentVariableNames();
+
+                // 获取 DEBUG_MODE 应该对其字符串值进行类型转换
+                $is_debug_mode = in_array("DEBUG_MODE", $envs) ? boolval(getenv("DEBUG_MODE")) : false; // 是否为调试模式，默认情况为False
 
                 // 根据调试模式的值请求得到不同的数据库连接参数
                 if ($is_debug_mode) {
@@ -50,7 +53,7 @@ class Config
                     $db_addr = getenv("DEV_DB_ADDR");
                     $db_user = getenv("DEV_DB_USER");
                     $db_pass = getenv("DEV_DB_PASS");
-                    $db_type = @getenv("DEV_DB_TYPE") ?: "mysql";
+                    $db_type = in_array("DEV_DB_TYPE", $envs) ? getenv("DEV_DB_TYPE") : "mysql";
                 } else {
                     $dotenv->required("DB_ADDR")->notEmpty();
                     $dotenv->required("DB_USER")->notEmpty();
@@ -60,7 +63,7 @@ class Config
                     $db_addr = getenv("DB_ADDR");
                     $db_user = getenv("DB_USER");
                     $db_pass = getenv("DB_PASS");
-                    $db_type = @getenv("DB_TYPE") ?: "mysql";
+                    $db_type = in_array("DB_TYPE", $envs) ? getenv("DB_TYPE") : "mysql";
                 }
             } catch (ValidationException $ex) {
                 throw new ConfigException("", 0, $ex);
