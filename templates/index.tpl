@@ -162,6 +162,7 @@
         </div>
     </div>
 </div>
+{include file="bootstrap.tpl"}
 <script>
     function delete_post(pid) {
         $.get("api/post/delete.php?pid=" + pid, function (data) {
