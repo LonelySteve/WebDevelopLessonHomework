@@ -19,12 +19,13 @@ class BaseException extends \Exception
     public function __construct($message = "", $code = -1, Throwable $previous = null)
     {
         $config = Config::load();
-
-        if ($config->debug_mode) {
-            $message = $this->join_message($message);
-        } else {
+        
+        // 为了安全起见，生产模式下，不显示具体错误信息
+        if (!$config->debug_mode) {
             $message = "";
         }
+
+        $message = $this->join_message($message);
 
         if ($code === -1) {
             $code = $this->default_code;
